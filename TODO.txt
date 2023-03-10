@@ -1,11 +1,10 @@
-- escolher 10 agoritmos
-
-- fazer feature selection (PCA, correlation-based)
-
 - limpar o dataset e fazer visualizações
 
 - ver se há outliers (IQR, DBSCAN  (atenção que há one hots))
 
+- escolher 10 agoritmos
+
+- fazer feature selection (PCA, correlation-based)
 
 - 
 - GRID SEARCH:
