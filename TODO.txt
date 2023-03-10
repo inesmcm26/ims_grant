@@ -1,0 +1,27 @@
+- escolher 10 agoritmos
+
+- fazer feature selection (PCA, correlation-based)
+
+- limpar o dataset e fazer visualizações
+
+- ver se há outliers (IQR, DBSCAN  (atenção que há one hots))
+
+
+- 
+- GRID SEARCH:
+    - para cada algoritmo (FOR)
+        - GRID SEARCH CV: para cada {set de parametros}: (FOR)
+            - para cada fold: (FOR)
+                - scaling (só se)
+                - feature selection
+                - (missing data)
+                
+                - treinar no treino
+                - testar no treino ({lista de measures})
+                - testar na validação ({lista de measures})
+            - guardar a mediana/média (?) do algoritmo com esse set de parametros
+            - ver se é melhor do que o anterior
+        - retornar melhor set de parametros para algoritmo
+        - escrever melhor set de parâmetros para algoritmo + train e val scores para um ficheiro
+    - retornar mehor algoritmo
+    
