@@ -23,4 +23,8 @@
         - retornar melhor set de parametros para algoritmo
         - escrever melhor set de parâmetros para algoritmo + train e val scores para um ficheiro
     - retornar mehor algoritmo
-    
+
+- DÚVIDAS:
+teoricamente imputation deveria ser feita dentro de cada fold, mas isso iria aumentar exponencialmente o tempo necessário para fazer a grid search
+tendo em conta que o número máximo de missing values por coluna roonda os 350, e sabendo que o dataset tem mais de 6800 observações, podemos
+assumir que, por ser grande o suficiente, os dados não ficaram biased na validação?
