@@ -2,6 +2,8 @@
 
 - ver se há outliers (IQR, DBSCAN  (atenção que há one hots))
 
+- lidar com imbalance target
+
 - escolher 10 agoritmos
 
 - fazer feature selection (PCA, correlation-based)
