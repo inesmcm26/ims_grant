@@ -1,6 +1,8 @@
-- limpar o dataset e fazer visualizações
+- limpar o dataset e fazer visualizações: TODO visualizações com o target (URGENTE)
 
-- ver se há outliers (IQR, DBSCAN  (atenção que há one hots))
+- ver se há outliers (IQR, DBSCAN  (atenção que há one hots)): em princípio não
+
+- pesquisar acerca de -2 answers (URGENTE)
 
 - lidar com imbalance target
 
@@ -27,6 +29,30 @@
     - retornar mehor algoritmo
 
 - DÚVIDAS:
-teoricamente imputation deveria ser feita dentro de cada fold, mas isso iria aumentar exponencialmente o tempo necessário para fazer a grid search
+1. teoricamente imputation deveria ser feita dentro de cada fold, mas isso iria aumentar exponencialmente o tempo necessário para fazer a grid search
 tendo em conta que o número máximo de missing values por coluna roonda os 350, e sabendo que o dataset tem mais de 6800 observações, podemos
 assumir que, por ser grande o suficiente, os dados não ficaram biased na validação?
+
+2. Ver técnicas de imputation para cada variável: OK
+    - drop de todas as observações com 5 ou mais missing values (-367 rows)
+    - para colunas com menos de 100 missing values: central tendency limit approach (median e mode para cada caso consoante formato da distribuição)
+    - para colunas com mais de 100 missing values: KNN com 5 neighbours OU moda
+
+3. Questions not asked: o que fazer em cada caso? Em casos sem boa solução faz sentido simplesmente não usar a variável? OK
+
+4. Feature engineering: não há variáveis muitooo correlacionadas à exceção de MATHARDSHIP. Vale a pena juntar? Ou é melhor apenas reduzir dimensionalidade usando PCA?
+JUNTAR
+
+5. Feature selection: Retirar variáveis muito correlacionadas entre sé. Vale a pena remover variáveis não relacionadas com o target ou é um risco?
+Atenção que é uma análise univariada apenas. Provavelmente drop não é o ideal à partida.
+ESCOLHER N FEATURES
+
+PCA: a ideia é usar apenas os PC?
+
+Para cada algoritmo fazer com todo o dataset, só com N features de correlation based/ Recursive best features e só com PCA
+
+6. O que fazer em relação a imbalanced target? Usar class weights? (Se sim, como conciliar com a weight de cada variável?)
+Usar Precision, Recall, PRC, AUC etc.? Escolhere ensembles?
+
+class_weights SIM
+Guardar várias metricas: Precision, recall, PRC, AUC etc.
