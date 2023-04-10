@@ -56,3 +56,26 @@ Usar Precision, Recall, PRC, AUC etc.? Escolhere ensembles?
 
 class_weights SIM
 Guardar várias metricas: Precision, recall, PRC, AUC etc.
+
+
+
+-------------------------------------------
+10/04/2023
+
+Feature Selection: Escolher N features
+
+- Tirei features altamente correlacionadas entre elas (3 featres foram dropped)
+
+- Usar recursive feature elimination com decision tree (usa information gain! -> apropriado para features numericas e categóricas)
+
+DÚVIDA: fazer à priori? ou fazer dentro de cada split?
+
+O mais correto é dentro de cada split (só ter em conta dados de treino e não de validação)
+Mas isso iria aumentar um bocado o tempo de correr o script
+Correr RFE em cada split demora em média 2 min
+
+DÚVIDA: queremos só f1 score, precision, recall, AUC certo?
+weighted f1 score faz com que um peso superior seja atribuida à classe subrepresentada (pobreza máxima).
+Se isto nos interessa mais do que prever class sobre representada (mínima pobreza), então talvez
+faça sentido usar um weighted f1 score
+
