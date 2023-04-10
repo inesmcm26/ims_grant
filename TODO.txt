@@ -79,3 +79,30 @@ weighted f1 score faz com que um peso superior seja atribuida à classe subrepre
 Se isto nos interessa mais do que prever class sobre representada (mínima pobreza), então talvez
 faça sentido usar um weighted f1 score
 
+DÚVIDA: 
+quando fiz impute dos missing values não escalei os dados. devia?
+os ranges dos dados são todos muito parecidos
+euclidean distance para numericos e ordinais
+hamming distance para nominais
+devia fazer dentro de cada split? só há 9 features com KNN o resto é com a moda
+
+NEXT STEPS:
+
+- criar um script base para o dataset inteiro OU dataset com PCA
+- extender o script para fazer feature selection (RFE) dentro de cada split
+
+- ter sempre em atenção class weights e sample weights
+
+---------------------------------
+
+PERGUNTAS:
+- RFE é fixe? (correlation based não ajuda muito porque nada é muito correlacionado com target e só dá para ver com numéricas)
+  se sim dentro de cada fold?
+- KNN Imputing deve ser com dados escalados e dentro de cada fold? só há 10 features que precisam (o resto é moda e pode ir fora)
+
+INFORMAR:
+- correr o script 1 vez para cada dataset (ajustar para o que leva feature selection):
+  menos risco de correr mal. demora o mesmo tempo
+- algoritmo escolhidos são fixes?
+- como é multiclass classification as métricas têm de ser weighted pelas classes
+- há sample weights e vou usar para treinar os algoritmos
