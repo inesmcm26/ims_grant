@@ -65,7 +65,7 @@ seed = 0
 # TODO: queremos um set de teste à parte para testar o melhor algoritmo no final em separado?
 
 
-def run(data_path, *kwargs):
+def run(data_path, *args):
     # ------------------------ Read data ------------------------ #
     data = pd.read_csv(data_path)
 
@@ -119,7 +119,7 @@ def run(data_path, *kwargs):
 
         # --------------------- Generate Models ------------------- #
         # models = get_models(class_weights = weights, seed = seed)
-        models = get_models(kwargs['configs_dt'], kwargs['configs_rf'], kwargs['configs_gb'], kwargs['configs_ab'], kwargs['configs_svc'], kwargs['configs_knn'], kwargs['configs_mlp'], class_weights, seed = seed)
+        models = get_models(*args, class_weights = weights, seed = seed)
 
         # --------------------- Train and Evaluate ------------------- #
 
@@ -143,10 +143,12 @@ def run(data_path, *kwargs):
             # Train
             if model_name[:3] in ['KNN', 'MLP']:
                 print('----------- TRAINING MODEL: {} -----------'.format(model_name))
+                # print(model)
                 # TODO: Quando é KNN usamos só as features numéricas para calculatr os KNN ? 
                 model.fit(X_train, y_train)
             else:
                 print('----------- TRAINING MODEL: {} -----------'.format(model_name))
+                # print(model)
                 model.fit(X_train, y_train, sample_weights)
 
             # Evaluate
@@ -170,20 +172,20 @@ def run(data_path, *kwargs):
         results[model_name]['Train F1'] = np.mean(results[model_name]['Train F1'])
         results[model_name]['Train Precision'] = np.mean(results[model_name]['Train Precision'])
         results[model_name]['Train Recall'] = np.mean(results[model_name]['Train Recall'])
-        results[model_name]['Train ROC AUC'] = np.mean(results[model_name]['Train ROC AUC'])
+        # results[model_name]['Train ROC AUC'] = np.mean(results[model_name]['Train ROC AUC'])
 
         results[model_name]['Val F1'] = np.mean(results[model_name]['Val F1'])
         results[model_name]['Val Precision'] = np.mean(results[model_name]['Val Precision'])
         results[model_name]['Val Recall'] = np.mean(results[model_name]['Val Recall'])
-        results[model_name]['Val ROC AUC'] = np.mean(results[model_name]['Val ROC AUC'])
+        # results[model_name]['Val ROC AUC'] = np.mean(results[model_name]['Val ROC AUC'])
         
         # TODO: Incluir variância ?
 
     return results
 
 # Generate configurations to be tested
-configs_dt = generate_configs_DT(n_models = 150)
-configs_rf = generate_configs_RF(n_models = 150)
+configs_dt = generate_configs_DT(n_models = 1)
+configs_rf = generate_configs_RF(n_models = 1)
 configs_gb = generate_configs_GB(n_models = 150)
 configs_ab = generate_configs_AB(n_models = 15)
 configs_svc = generate_configs_SVC(n_models = 21)
@@ -191,7 +193,9 @@ configs_knn = generate_configs_KNN(n_models = 16)
 configs_mlp = generate_configs_MLP(n_models = 150)
 
 start_time = time.time()
-res = run('data/preprocessed_data.csv', configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp)
+# res = run('data/preprocessed_data.csv', configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp)
+res = run('data/preprocessed_data.csv', configs_dt, configs_rf)
+
 print('Time elapsed: {} seconds'.format(time.time() - start_time))
 
 res = pd.DataFrame.from_dict(res, orient = 'index')

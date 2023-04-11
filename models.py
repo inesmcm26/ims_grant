@@ -204,8 +204,8 @@ def generate_MLP(configs, seed):
     return models
 
 
-def get_models(configs_dt, configs_rf, configs_gb, configs_ab, configs_svm, configs_knn,
-               configs_mlp, class_weights, seed):
+def get_models(configs_dt = None, configs_rf = None, configs_gb = None, configs_ab = None, configs_svm = None, configs_knn = None,
+               configs_mlp = None, class_weights = None, seed = None):
 
     # 624 model configurations + TPOT = 625 models
     models = {
@@ -222,40 +222,40 @@ def get_models(configs_dt, configs_rf, configs_gb, configs_ab, configs_svm, conf
     rf = generate_RF(configs_rf, class_weights,seed)
     models.update(rf)
 
-    # Gradient Boosting: 2160 possible combinations
-    gb = generate_GB(configs_gb, seed = seed)
-    models.update(gb)
+    # # Gradient Boosting: 2160 possible combinations
+    # gb = generate_GB(configs_gb, seed = seed)
+    # models.update(gb)
 
-    # Adaptive Boosting: 15 possible combinations
-    ab = generate_AB(configs_ab, seed = seed)
-    models.update(ab)
+    # # Adaptive Boosting: 15 possible combinations
+    # ab = generate_AB(configs_ab, seed = seed)
+    # models.update(ab)
     
-    # SVM: 21 possible combinations
-    svc = generate_SVC(configs_svm, class_weights = class_weights, seed = seed)
-    models.update(svc)
+    # # SVM: 21 possible combinations
+    # svc = generate_SVC(configs_svm, class_weights = class_weights, seed = seed)
+    # models.update(svc)
 
-    # KNN: atenção! só pode levar features numéricas
-    # TODO: o que fazer ??
-    knn = generate_KNN(configs_knn)
-    models.update(knn)
+    # # KNN: atenção! só pode levar features numéricas
+    # # TODO: o que fazer ??
+    # knn = generate_KNN(configs_knn)
+    # models.update(knn)
     
-    # Neural Network: 150 possible models NO SAMPLE_WEIGHT
-    mlp = generate_MLP(configs_mlp, seed = seed)
-    models.update(mlp)
+    # # Neural Network: 150 possible models NO SAMPLE_WEIGHT
+    # mlp = generate_MLP(configs_mlp, seed = seed)
+    # models.update(mlp)
 
     return models
 
-class_weights = {1: 0.75, 2: 0.15, 3: 0.1}
+# class_weights = {1: 0.75, 2: 0.15, 3: 0.1}
 
-configs_dt = generate_configs_DT(n_models = 150)
-configs_rf = generate_configs_RF(n_models = 150)
-configs_gb = generate_configs_GB(n_models = 150)
-configs_ab = generate_configs_AB(n_models = 15)
-configs_svc = generate_configs_SVC(n_models = 21)
-configs_knn = generate_configs_KNN(n_models = 16)
-configs_mlp = generate_configs_MLP(n_models = 150)
+# configs_dt = generate_configs_DT(n_models = 150)
+# configs_rf = generate_configs_RF(n_models = 150)
+# configs_gb = generate_configs_GB(n_models = 150)
+# configs_ab = generate_configs_AB(n_models = 15)
+# configs_svc = generate_configs_SVC(n_models = 21)
+# configs_knn = generate_configs_KNN(n_models = 16)
+# configs_mlp = generate_configs_MLP(n_models = 150)
 
-models = get_models(configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp, class_weights, seed = 0)
-models2 = get_models(configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp, class_weights, seed = 0)
-print(models)
-print(models2)
+# models = get_models(configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp, class_weights, seed = 0)
+# models2 = get_models(configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp, class_weights, seed = 0)
+# print(models)
+# print(models2)
