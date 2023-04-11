@@ -23,10 +23,11 @@
 
 # pseudocode:
 # for each split:
+#   calcular sample weights
+#   calcular class weights
 #   missing values(?)
 #   scale numerical features
 #   (feature selection)
-#   calcular class weights
 #   for each algoritmo (e set de parâmetros):
 #       treinar em X_train, y_train (com sample weights)
 #       testar em y_train_pred, y_train (com class weights)
@@ -47,13 +48,15 @@ import random
 import numpy as np
 import pandas as pd
 
-from preprocess import scale
+# Utils
+from utils import scale
 
+# Random Seed
 np.random.seed(0)
 random.seed(0)
 seed = 0
 
-def run(data_path):
+def run(data_path, algorithms):
     # ------------------------ Read data ------------------------ #
     data = pd.read_csv(data_path)
 
@@ -79,7 +82,7 @@ def run(data_path):
         weights = {}
         class_weights = compute_class_weight('balanced', classes=[1, 2, 3], y=y_train)
         for i, value in enumerate(class_weights):
-            weights[i + 1] = value
+            weights[i + 1] = value # to also use in model training
 
         # To use in model evaluation
         X_train_weights = y_train.map({k: v for k, v in weights.items()})
@@ -95,5 +98,5 @@ def run(data_path):
         # ------------------------ Scaling ------------------------ #
         X_train_num, X_val_num = scale(X_train_num, X_val_num)
 
-        
+
 
