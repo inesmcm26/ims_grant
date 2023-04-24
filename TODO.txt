@@ -69,15 +69,13 @@ Feature Selection: Escolher N features
 - Usar recursive feature elimination com decision tree (usa information gain! -> apropriado para features numericas e categóricas)
 
 DÚVIDA: fazer à priori? ou fazer dentro de cada split?
-
-O mais correto é dentro de cada split (só ter em conta dados de treino e não de validação)
-Mas isso iria aumentar um bocado o tempo de correr o script
-Correr RFE em cada split demora em média 2 min
+- Dentro
 
 DÚVIDA: queremos só f1 score, precision, recall, AUC certo?
 weighted f1 score faz com que um peso superior seja atribuida à classe subrepresentada (pobreza máxima).
 Se isto nos interessa mais do que prever class sobre representada (mínima pobreza), então talvez
 faça sentido usar um weighted f1 score, ACCURACY
+- F1 score, precision, recall, accuracy e std deviation
 
 DÚVIDA: 
 quando fiz impute dos missing values não escalei os dados. devia?
@@ -85,7 +83,6 @@ os ranges dos dados são todos muito parecidos
 euclidean distance para numericos e ordinais
 hamming distance para nominais
 devia fazer dentro de cada split? só há 9 features com KNN o resto é com a moda
-
 SIM
 
 NEXT STEPS:
@@ -99,13 +96,13 @@ NEXT STEPS:
 
 PERGUNTAS:
 - RFE é fixe? (correlation based não ajuda muito porque nada é muito correlacionado com target e só dá para ver com numéricas)
-  se sim dentro de cada fold?
-- KNN Imputing deve ser com dados escalados e dentro de cada fold? só há 10 features que precisam (o resto é moda e pode ir fora)
-- KNeighborsClassifier só usa numerical features para evr viiznhos mais próximos??
-- Faz sentido incluir std deviation das performances? mediana e std 
+  se sim dentro de cada fold? SIM
+- KNN Imputing deve ser com dados escalados e dentro de cada fold? só há 10 features que precisam (o resto é moda e pode ir fora) SIM dados escalados mas fora dos folds
+- KNeighborsClassifier só usa numerical features para ver vizinhos mais próximos? SIM
+- Faz sentido incluir std deviation das performances? mediana e std SIM
 - Queremos um set de teste à oarte para testar o melhor algoritmo no final? NÃO
-- Queremos AUC ROC? A forma como o sklearn calcula aqui é um bocado estranho no caso de multiclass porque não há só 1 threshold etc
-- Quantas configurações queremos?
+- Queremos AUC ROC? A forma como o sklearn calcula aqui é um bocado estranho no caso de multiclass porque não há só 1 threshold etc NÃO
+- Quantas configurações queremos? ~ 30 de cada
 
 INFORMAR:
 - correr o script 1 vez para cada dataset (ajustar para o que leva feature selection):
@@ -116,4 +113,16 @@ INFORMAR:
 - também vou usar class_weights para treinar os algoritmos sempre que possível
 
 
-- comparar estatisticamente resultados will cox
+- comparar estatisticamente resultados -> will-cox
+
+--------------------------------- 24/04/2023 ------------------------------------
+
+1. Fazer scaling antes de imputar os valores (preprocess.ipynb)
+2. Montar RFE
+3. Juntar accuracy às métricas
+4. Mudar o número de modelos a serem criados
+5. Incluir TPOT
+
+Correr 2 vezes
+- Dataset original
+- Dataset com feat enginerring + feat selection
