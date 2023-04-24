@@ -3,7 +3,7 @@ import itertools
 
 # Models
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier # XGBoost
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -222,7 +222,7 @@ def get_models(configs_dt = None, configs_rf = None, configs_gb = None, configs_
     rf = generate_RF(configs_rf, class_weights,seed)
     models.update(rf)
 
-    # # Gradient Boosting: 2160 possible combinations
+    # # Gradient Boosting: 2160 possible combinations 30/50
     # gb = generate_GB(configs_gb, seed = seed)
     # models.update(gb)
 

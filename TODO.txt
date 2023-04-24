@@ -77,7 +77,7 @@ Correr RFE em cada split demora em média 2 min
 DÚVIDA: queremos só f1 score, precision, recall, AUC certo?
 weighted f1 score faz com que um peso superior seja atribuida à classe subrepresentada (pobreza máxima).
 Se isto nos interessa mais do que prever class sobre representada (mínima pobreza), então talvez
-faça sentido usar um weighted f1 score
+faça sentido usar um weighted f1 score, ACCURACY
 
 DÚVIDA: 
 quando fiz impute dos missing values não escalei os dados. devia?
@@ -85,6 +85,8 @@ os ranges dos dados são todos muito parecidos
 euclidean distance para numericos e ordinais
 hamming distance para nominais
 devia fazer dentro de cada split? só há 9 features com KNN o resto é com a moda
+
+SIM
 
 NEXT STEPS:
 
@@ -100,8 +102,8 @@ PERGUNTAS:
   se sim dentro de cada fold?
 - KNN Imputing deve ser com dados escalados e dentro de cada fold? só há 10 features que precisam (o resto é moda e pode ir fora)
 - KNeighborsClassifier só usa numerical features para evr viiznhos mais próximos??
-- Faz sentido incluir std deviation das performances?
-- Queremos um set de teste à oarte para testar o melhor algoritmo no final?
+- Faz sentido incluir std deviation das performances? mediana e std 
+- Queremos um set de teste à oarte para testar o melhor algoritmo no final? NÃO
 - Queremos AUC ROC? A forma como o sklearn calcula aqui é um bocado estranho no caso de multiclass porque não há só 1 threshold etc
 - Quantas configurações queremos?
 
@@ -112,3 +114,6 @@ INFORMAR:
 - como é multiclass classification as métricas têm de ser weighted pelas classes
 - há sample weights e vou usar para treinar os algoritmos
 - também vou usar class_weights para treinar os algoritmos sempre que possível
+
+
+- comparar estatisticamente resultados will cox

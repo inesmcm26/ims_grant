@@ -179,7 +179,7 @@ def run(data_path, *args):
         results[model_name]['Val Recall'] = np.mean(results[model_name]['Val Recall'])
         # results[model_name]['Val ROC AUC'] = np.mean(results[model_name]['Val ROC AUC'])
         
-        # TODO: Incluir variância ?
+        # TODO: Incluir variância ? SIM
 
     return results
 
