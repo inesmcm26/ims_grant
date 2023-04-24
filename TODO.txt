@@ -120,6 +120,7 @@ INFORMAR:
 1. Fazer scaling antes de imputar os valores (preprocess.ipynb)
 2. Montar RFE
 3. Juntar accuracy às métricas
+4. Juntar mediana às métricas
 4. Mudar o número de modelos a serem criados
 5. Incluir TPOT
 
