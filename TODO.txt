@@ -166,3 +166,13 @@ Correr 2 vezes
   4. Treinar TPOT em X e y (dataset inteiro) passando cv = skf como argumento
   5. Avaliar TPOT (onde???)
   
+-------------------------- 25/04/2023 ------------------------------
+
+DÚVIDAS:
+1. - TPOT deve ficar fora do kfold. Basta passar o mesmo KFold para dentro dele e no final calcular o cv_score
+   da melhor pipeline criada nos folds certo?
+   - Podemos dizer que a Grid Search é uma forma de AutoML? Compara múltiplas configurações de modelos de forma
+   'automática'.
+2. TPOT já faz feature selection, por isso diria que faço apenas uma comparação final de Grid Search com e sem RFE e TPOT
+3. Quando escrevi relatório disse usei 2 técnicas de AutoML (Grid Hyperparameter Search) + TPOT. Isto é correto?
+   Realcei as vantagens do TPOT em relação à GridSearch. A ideia no final era mostrar que o TPOT é melhor.

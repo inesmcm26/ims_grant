@@ -10,6 +10,13 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 from tpot import TPOTClassifier
 
+import numpy as np
+
+# Random Seed
+np.random.seed(0)
+random.seed(0)
+seed = 0
+
 def get_random(n_models, *args):
     # Generate all possible combinations of parameter values
     all_configs = list(itertools.product(*args))
