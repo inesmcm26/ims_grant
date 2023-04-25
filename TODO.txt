@@ -124,7 +124,18 @@ INFORMAR:
 4. Juntar mediana às métricas OK
 4. Mudar o número de modelos a serem criados OK
 5. Incluir TPOT
+6. Guardar configurações de cada modelo! (maybe escrever o dict inicial para um ficheiro)
 
 Correr 2 vezes
 - Dataset original
 - Dataset com feat engineering + feat selection
+
+-------------------------- 25/04/2023 -----------------------------
+
+- TPOT já faz feature selection: faz sentido usar no dataset com RFE?
+
+- No CSV final com as médias dos resultados de cada configuração, no tpot vamos ter a média
+  da performance de todos os modelos que o tpot encontrou como melhores. No entanto, é preciso guardar
+  num ficheiro separado qual o melhor modelo encontrado pelo tpot em todos os splits e respetiva performance
+
+- 10 folds (~ 600 observações para validação por fold)

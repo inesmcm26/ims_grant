@@ -57,13 +57,15 @@ from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_sc
 # Time
 import time
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 # Random Seed
 np.random.seed(0)
 random.seed(0)
 seed = 0
 
-# TODO: queremos um set de teste à parte para testar o melhor algoritmo no final em separado?
-
+import pickle
 
 def run(data_path, *args):
     # ------------------------ Read data ------------------------ #
@@ -125,6 +127,20 @@ def run(data_path, *args):
         # --------------------- Generate Models ------------------- #
         models = get_models(*args, class_weights = weights, seed = seed)
 
+        # save models configurations
+        if i == 0:
+            file = open('models_configs.txt', 'w')
+
+            for model_name, model in models.items():
+                file.write('{}: {}\n'.format(model_name, model.get_params()))
+
+            file.close()
+
+        # ------------------ Setup TPOT results file ----------------- #
+        file = open('tpot_best_config.txt', 'a')
+        file.write('TPOT Best Configurations Results:\n')
+        file.close()
+        
         # --------------------- Train and Evaluate ------------------- #
 
         # If in the first split, initialize the results dict
@@ -151,7 +167,6 @@ def run(data_path, *args):
         
         for model_name, model in models.items():
             
-
             # Train
             if model_name[:3] in ['KNN', 'MLP']:
                 print('----------- TRAINING MODEL: {} -----------'.format(model_name))
@@ -178,6 +193,16 @@ def run(data_path, *args):
             results[model_name]['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted', sample_weight = X_val_weights))
             results[model_name]['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted', sample_weight = X_val_weights))
 
+            if model_name == 'TPOT':
+                model.export(f'tpot_pipelines/tpot_pipeline{i}.py') # TODO: ver isto
+                file = open('tpot_best_config.txt', 'a')
+                file.write('Best {} model in split {}: {}\n'.format(model_name, i + 1, model.fitted_pipeline_, ))
+                file.write('Train Accuracy: {}, Train F1: {}, Train Precision: {}, Train Recall: {}\n'.format(results[model_name]['Train Accuracy'][-1], results[model_name]['Train F1'][-1], results[model_name]['Train Precision'][-1], results[model_name]['Train Recall'][-1]))
+                file.write('Val Accuracy: {}, Val F1: {}, Val Precision: {}, Val Recall: {}\n'.format(results[model_name]['Val Accuracy'][-1], results[model_name]['Val F1'][-1], results[model_name]['Val Precision'][-1], results[model_name]['Val Recall'][-1]))
+                file.close()
+
+        if i == 1:
+            break
 
     for model_name in models.keys():
         results[model_name]['Train Accuracy Stdev'] = np.std(results[model_name]['Train Accuracy'])

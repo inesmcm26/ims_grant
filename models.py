@@ -10,6 +10,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 from tpot import TPOTClassifier
 
+
 def get_random(n_models, *args):
     # Generate all possible combinations of parameter values
     all_configs = list(itertools.product(*args))
@@ -243,7 +244,7 @@ def get_models(configs_dt = None, configs_rf = None, configs_gb = None, configs_
     # mlp = generate_MLP(configs_mlp, seed = seed)
     # models.update(mlp)
 
-    models['TPOT'] = TPOTClassifier(scoring = 'f1_weighted', verbosity=2, cv=1, n_jobs=-1,
+    models['TPOT'] = TPOTClassifier(generations = 5, population_size = 20, scoring = 'f1_weighted', verbosity=2, cv=None, n_jobs=-1,
                                     random_state = seed, periodic_checkpoint_folder='/tpot_results')
 
     return models
