@@ -119,12 +119,12 @@ INFORMAR:
 
 1. Fazer scaling antes de imputar os valores (preprocess.ipynb) DONE
 2. Fazer scaling de features numéricas dentro de cada fold OK
-2. Montar RFE PARA DEPOIS
+2. Montar RFE (PARA DEPOIS)
 3. Juntar accuracy às métricas OK
 4. Juntar mediana às métricas OK
 4. Mudar o número de modelos a serem criados OK
-5. Incluir TPOT
-6. Guardar configurações de cada modelo! (maybe escrever o dict inicial para um ficheiro)
+5. Incluir TPOT OK
+6. Guardar configurações de cada modelo! OK
 
 Correr 2 vezes
 - Dataset original
@@ -176,3 +176,5 @@ DÚVIDAS:
 2. TPOT já faz feature selection, por isso diria que faço apenas uma comparação final de Grid Search com e sem RFE e TPOT
 3. Quando escrevi relatório disse usei 2 técnicas de AutoML (Grid Hyperparameter Search) + TPOT. Isto é correto?
    Realcei as vantagens do TPOT em relação à GridSearch. A ideia no final era mostrar que o TPOT é melhor.
+4. No final vou ter de escrever um relatório detalhado? É só para entregar à FCT? É para ser um artigo para ser
+   publicado como os dois artigos que o prof me mostrou?
