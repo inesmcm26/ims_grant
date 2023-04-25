@@ -47,25 +47,31 @@ import random
 import numpy as np
 import pandas as pd
 
+# TPOT
+from tpot import TPOTClassifier
+
 # Utils
 from utils import scale
 from models import get_models, generate_configs_DT, generate_configs_RF, generate_configs_GB, generate_configs_AB, generate_configs_SVC, generate_configs_KNN, generate_configs_MLP
 
 # Metrics
-from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
+from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score, make_scorer
+from sklearn.model_selection import cross_validate
 
 # Time
 import time
 
 import warnings
-warnings.filterwarnings("ignore", category=FutureWarning)
+from sklearn.exceptions import ConvergenceWarning
+
+# ignore convergence warnings
+warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 
 # Random Seed
 np.random.seed(0)
 random.seed(0)
 seed = 0
 
-import pickle
 
 def run(data_path, *args):
     # ------------------------ Read data ------------------------ #
@@ -75,6 +81,11 @@ def run(data_path, *args):
 
     X = data.drop('fpl', axis = 1)
     y = data['fpl']
+
+    # # ------------------ Setup TPOT results file ----------------- #
+    # file = open('tpot_best_config.txt', 'a')
+    # file.write('TPOT Best Configurations Results:\n')
+    # file.close()
 
     # ------------------------ Cross-validation ------------------------ #
     results = {}
@@ -96,14 +107,11 @@ def run(data_path, *args):
         X_val = X_val.drop('finalwt', axis = 1)
 
         # --------------------- Class Weights --------------------- #
+        # To train models that take this into account
         weights = {}
         class_weights = compute_class_weight('balanced', classes=[1, 2, 3], y=y_train)
         for j, value in enumerate(class_weights):
             weights[j + 1] = value # To use on model creation
-
-        # To use in model evaluation
-        X_train_weights = y_train.map({k: v for k, v in weights.items()})
-        X_val_weights = y_val.map({k: v for k, v in weights.items()})
 
         # -------------- Split numerical and nominal -------------- #
         
@@ -136,16 +144,12 @@ def run(data_path, *args):
 
             file.close()
 
-        # ------------------ Setup TPOT results file ----------------- #
-        file = open('tpot_best_config.txt', 'a')
-        file.write('TPOT Best Configurations Results:\n')
-        file.close()
         
         # --------------------- Train and Evaluate ------------------- #
 
         # If in the first split, initialize the results dict
         if i == 0:
-            for model_name in models.keys():
+            for model_name in list(models.keys()) + ['TPOT']:
                 results[model_name] = {'Train Accuracy': [],
                                        'Train Accuracy Stdev': 0,
                                        'Train F1': [],
@@ -163,8 +167,6 @@ def run(data_path, *args):
                                        'Val Recall': [],
                                        'Val Recall Stdev': 0}
                 
-                
-        
         for model_name, model in models.items():
             
             # Train
@@ -183,26 +185,23 @@ def run(data_path, *args):
             y_val_pred = model.predict(X_val)
 
             # --------------------- Save Results ------------------- #
-            results[model_name]['Train Accuracy'].append(accuracy_score(y_train, y_train_pred, sample_weight = X_train_weights))
-            results[model_name]['Train F1'].append(f1_score(y_train, y_train_pred, average = 'weighted', sample_weight = X_train_weights))
-            results[model_name]['Train Precision'].append(precision_score(y_train, y_train_pred, average = 'weighted', sample_weight = X_train_weights))
-            results[model_name]['Train Recall'].append(recall_score(y_train, y_train_pred, average = 'weighted', sample_weight = X_train_weights))
+            results[model_name]['Train Accuracy'].append(accuracy_score(y_train, y_train_pred))
+            results[model_name]['Train F1'].append(f1_score(y_train, y_train_pred, average = 'weighted'))
+            results[model_name]['Train Precision'].append(precision_score(y_train, y_train_pred, average = 'weighted'))
+            results[model_name]['Train Recall'].append(recall_score(y_train, y_train_pred, average = 'weighted'))
 
-            results[model_name]['Val Accuracy'].append(accuracy_score(y_val, y_val_pred, sample_weight = X_val_weights))
-            results[model_name]['Val F1'].append(f1_score(y_val, y_val_pred, average = 'weighted', sample_weight = X_val_weights))
-            results[model_name]['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted', sample_weight = X_val_weights))
-            results[model_name]['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted', sample_weight = X_val_weights))
+            results[model_name]['Val Accuracy'].append(accuracy_score(y_val, y_val_pred))
+            results[model_name]['Val F1'].append(f1_score(y_val, y_val_pred, average = 'weighted'))
+            results[model_name]['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted'))
+            results[model_name]['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted'))
 
-            if model_name == 'TPOT':
-                model.export(f'tpot_pipelines/tpot_pipeline{i}.py') # TODO: ver isto
-                file = open('tpot_best_config.txt', 'a')
-                file.write('Best {} model in split {}: {}\n'.format(model_name, i + 1, model.fitted_pipeline_, ))
-                file.write('Train Accuracy: {}, Train F1: {}, Train Precision: {}, Train Recall: {}\n'.format(results[model_name]['Train Accuracy'][-1], results[model_name]['Train F1'][-1], results[model_name]['Train Precision'][-1], results[model_name]['Train Recall'][-1]))
-                file.write('Val Accuracy: {}, Val F1: {}, Val Precision: {}, Val Recall: {}\n'.format(results[model_name]['Val Accuracy'][-1], results[model_name]['Val F1'][-1], results[model_name]['Val Precision'][-1], results[model_name]['Val Recall'][-1]))
-                file.close()
-
-        if i == 1:
-            break
+            # if model_name == 'TPOT':
+            #     model.export(f'tpot_pipelines/tpot_pipeline{i}.py') # TODO: ver isto
+            #     file = open('tpot_best_config.txt', 'a')
+            #     file.write('Best {} model in split {}: {}\n'.format(model_name, i + 1, model.fitted_pipeline_, ))
+            #     file.write('Train Accuracy: {}, Train F1: {}, Train Precision: {}, Train Recall: {}\n'.format(results[model_name]['Train Accuracy'][-1], results[model_name]['Train F1'][-1], results[model_name]['Train Precision'][-1], results[model_name]['Train Recall'][-1]))
+            #     file.write('Val Accuracy: {}, Val F1: {}, Val Precision: {}, Val Recall: {}\n'.format(results[model_name]['Val Accuracy'][-1], results[model_name]['Val F1'][-1], results[model_name]['Val Precision'][-1], results[model_name]['Val Recall'][-1]))
+            #     file.close()
 
     for model_name in models.keys():
         results[model_name]['Train Accuracy Stdev'] = np.std(results[model_name]['Train Accuracy'])
@@ -223,11 +222,64 @@ def run(data_path, *args):
         results[model_name]['Val Recall Stdev'] = np.std(results[model_name]['Val Recall'])
         results[model_name]['Val Recall'] = np.mean(results[model_name]['Val Recall'])
         
+    
+    # ------------------------------------------ TPOT ----------------------------------------- #
+
+    # ---- sample weights ---- #
+    sample_weights = X['finalwt']
+    X.drop('finalwt', axis = 1, inplace = True)
+
+    # Define custom evaluation metrcis
+    weighted_accuracy_scorer = make_scorer(accuracy_score)
+    weighted_f1_scorer = make_scorer(f1_score, average='weighted')
+    weighted_precision_scorer = make_scorer(precision_score, average='weighted')
+    weighted_recall_scorer = make_scorer(recall_score, average='weighted')
+
+    scoring = {'accuracy': weighted_accuracy_scorer,
+               'f1_weighted': weighted_f1_scorer,
+               'precision_weighted': weighted_precision_scorer,
+               'recall_weighted': weighted_recall_scorer}
+    
+    # --------- Define TPOT model --------- #
+    tpot = TPOTClassifier(generations = 10, population_size = 10, scoring = weighted_f1_scorer, verbosity=2, cv = skf, n_jobs=-1,
+                                    random_state = seed, periodic_checkpoint_folder='/tpot_results')
+
+    # ---- fit the model ---- #
+    tpot.fit(X, y, sample_weight = sample_weights)
+
+    # calculate cv scores
+    cv_scores = cross_validate(tpot.fitted_pipeline_, X, y, cv=skf, scoring=scoring, return_train_score = True)
+
+    print(cv_scores)
+
+    results['TPOT']['Train Accuracy'] = cv_scores['train_accuracy'].mean()
+    results['TPOT']['Train Accuracy Stdev'] = cv_scores['train_accuracy'].std()
+    results['TPOT']['Train Precision'] = cv_scores['train_precision_weighted'].mean()
+    results['TPOT']['Train Precision Stdev'] = cv_scores['train_precision_weighted'].std()
+    results['TPOT']['Train Recall'] = cv_scores['train_recall_weighted'].mean()
+    results['TPOT']['Train Recall Stdev'] = cv_scores['train_recall_weighted'].std()
+    results['TPOT']['Train F1'] = cv_scores['train_f1_weighted'].mean()
+    results['TPOT']['Train F1 Stdev'] = cv_scores['train_f1_weighted'].std()
+
+    results['TPOT']['Val Accuracy'] = cv_scores['test_accuracy'].mean()
+    results['TPOT']['Val Accuracy Stdev'] = cv_scores['test_precision_weighted'].std()
+    results['TPOT']['Val Precision'] = cv_scores['test_precision_weighted'].mean()
+    results['TPOT']['Val Precision Stdev'] = cv_scores['test_precision_weighted'].std()
+    results['TPOT']['Val Recall'] = cv_scores['test_recall_weighted'].mean()
+    results['TPOT']['Val Recall Stdev'] = cv_scores['test_recall_weighted'].std()
+    results['TPOT']['Val F1'] = cv_scores['test_f1_weighted'].mean()
+    results['TPOT']['Val F1 Stdev'] = cv_scores['test_f1_weighted'].std()
+
+    tpot.export('tpot_pipeline.py')
+    file = open('models_configs.txt', 'a')
+    file.write('Best {} model\n'.format(tpot.fitted_pipeline_))
+    file.close()
+
     return results
 
 # Generate configurations to be tested
-configs_dt = generate_configs_DT(n_models = 1)
-configs_rf = generate_configs_RF(n_models = 1)
+configs_dt = generate_configs_DT(n_models = 30)
+configs_rf = generate_configs_RF(n_models = 30)
 configs_gb = generate_configs_GB(n_models = 30)
 configs_ab = generate_configs_AB(n_models = 15)
 configs_svc = generate_configs_SVC(n_models = 21)

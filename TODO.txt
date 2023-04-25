@@ -138,4 +138,31 @@ Correr 2 vezes
   da performance de todos os modelos que o tpot encontrou como melhores. No entanto, é preciso guardar
   num ficheiro separado qual o melhor modelo encontrado pelo tpot em todos os splits e respetiva performance
 
-- 10 folds (~ 600 observações para validação por fold)
+- TPOTClassifier: retorna 1 modelo (melhor modelo usando kfold)
+  Queremos treinar o tpot 1 vez em cada fold meu com cv = 0/cv = 5
+  Ou queremos o tpot treinado uma vez com o seu proprio KFold igual ao meu? -> problema é que não dá para costumizar folds (scaling etc.)
+  Supostamente o TPOT automatiza feature selection, feature preprocessing and feature constructions por isso não seria
+  preciso mete-lo dentro do kfold
+
+  Ou seja, avaliamos todos os modelos normais com o custom KFold que escala os dados, vê as class weights e sample_weights etc
+  E depois avaliamos o TPOT com a mesma instância do KFold mas sem nada de preprocessing
+  Passamos apenas para o fit as sample_weights e ele depois faz lá dentro o KFold e está tudo certo
+
+  Problema: não dá para avaliar o melhor modelo do tpot sem o testar num test set
+
+
+  OU SEJA:
+
+  1. Criar stratified kfold skf
+  2. Para cada fold:
+    2.1. Escalar os dados numéricos
+    2.2. Guardar sample_weights do treino (usadas no método fit dos modelos)
+    2.3. Guardar class_weights do treino (usadas em model evaluation metrics: f1_score, precision etc.)
+    2.4. Para cada modelo:
+      2.4.1. Treinar o modelo
+      2.4.2. Adicionar performance do modelo e treino e val à lista de performances do modelo
+  3. Calcular average de performance de cada modelo nos 10 folds (a performance com que ficamos é a de validação)
+
+  4. Treinar TPOT em X e y (dataset inteiro) passando cv = skf como argumento
+  5. Avaliar TPOT (onde???)
+  
