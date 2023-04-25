@@ -118,11 +118,11 @@ INFORMAR:
 --------------------------------- 24/04/2023 ------------------------------------
 
 1. Fazer scaling antes de imputar os valores (preprocess.ipynb) DONE
-2. Fazer scaling de features numéricas dentro de cada fold
-2. Montar RFE
-3. Juntar accuracy às métricas
-4. Juntar mediana às métricas
-4. Mudar o número de modelos a serem criados
+2. Fazer scaling de features numéricas dentro de cada fold OK
+2. Montar RFE PARA DEPOIS
+3. Juntar accuracy às métricas OK
+4. Juntar mediana às métricas OK
+4. Mudar o número de modelos a serem criados OK
 5. Incluir TPOT
 
 Correr 2 vezes

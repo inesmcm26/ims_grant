@@ -8,7 +8,7 @@ from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
-# from tpot import TPOTClassifier
+from tpot import TPOTClassifier
 
 def get_random(n_models, *args):
     # Generate all possible combinations of parameter values
@@ -243,12 +243,15 @@ def get_models(configs_dt = None, configs_rf = None, configs_gb = None, configs_
     # mlp = generate_MLP(configs_mlp, seed = seed)
     # models.update(mlp)
 
+    models['TPOT'] = TPOTClassifier(scoring = 'f1_weighted', verbosity=2, cv=1, n_jobs=-1,
+                                    random_state = seed, periodic_checkpoint_folder='/tpot_results')
+
     return models
 
 # class_weights = {1: 0.75, 2: 0.15, 3: 0.1}
 
-# configs_dt = generate_configs_DT(n_models = 150)
-# configs_rf = generate_configs_RF(n_models = 150)
+# configs_dt = generate_configs_DT(n_models = 1)
+# configs_rf = generate_configs_RF(n_models = 1)
 # configs_gb = generate_configs_GB(n_models = 150)
 # configs_ab = generate_configs_AB(n_models = 15)
 # configs_svc = generate_configs_SVC(n_models = 21)
@@ -256,6 +259,6 @@ def get_models(configs_dt = None, configs_rf = None, configs_gb = None, configs_
 # configs_mlp = generate_configs_MLP(n_models = 150)
 
 # models = get_models(configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp, class_weights, seed = 0)
-# models2 = get_models(configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp, class_weights, seed = 0)
+# models2 = get_models(configs_dt, configs_rf, seed = 0)
 # print(models)
 # print(models2)

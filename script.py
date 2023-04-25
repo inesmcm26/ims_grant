@@ -201,13 +201,13 @@ def run(data_path, *args):
     return results
 
 # Generate configurations to be tested
-configs_dt = generate_configs_DT(n_models = 5)
-configs_rf = generate_configs_RF(n_models = 3)
-configs_gb = generate_configs_GB(n_models = 150)
+configs_dt = generate_configs_DT(n_models = 1)
+configs_rf = generate_configs_RF(n_models = 1)
+configs_gb = generate_configs_GB(n_models = 30)
 configs_ab = generate_configs_AB(n_models = 15)
 configs_svc = generate_configs_SVC(n_models = 21)
 configs_knn = generate_configs_KNN(n_models = 16)
-configs_mlp = generate_configs_MLP(n_models = 150)
+configs_mlp = generate_configs_MLP(n_models = 30)
 
 start_time = time.time()
 # res = run('data/preprocessed_data.csv', configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp)
@@ -216,4 +216,4 @@ res = run('data/preprocessed_data.csv', configs_dt, configs_rf)
 print('Time elapsed: {} seconds'.format(time.time() - start_time))
 
 res = pd.DataFrame.from_dict(res, orient = 'index')
-res.to_csv('results/preprocessed_data_results.csv')
+res.to_csv('results/results_original.csv')
