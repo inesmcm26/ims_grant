@@ -257,7 +257,7 @@ def run(data_path, *args):
                'recall_weighted': weighted_recall_scorer}
     
     # --------- Define TPOT model --------- #
-    tpot = TPOTClassifier(generations = 20, population_size = 30, scoring = 'f1_weighted', verbosity=2, cv = skf, n_jobs=-1,
+    tpot = TPOTClassifier(generations = 50, population_size = 30, scoring = 'f1_weighted', verbosity=2, cv = skf, n_jobs=-1,
                                     random_state = seed, periodic_checkpoint_folder='/tpot_results')
 
     # ---- fit the model ---- #
