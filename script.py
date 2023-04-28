@@ -203,14 +203,6 @@ def run(data_path, *args):
             results[model_name]['Val Precision Mean'].append(precision_score(y_val, y_val_pred, average = 'weighted'))
             results[model_name]['Val Recall Mean'].append(recall_score(y_val, y_val_pred, average = 'weighted'))
 
-            # if model_name == 'TPOT':
-            #     model.export(f'tpot_pipelines/tpot_pipeline{i}.py') # TODO: ver isto
-            #     file = open('tpot_best_config.txt', 'a')
-            #     file.write('Best {} model in split {}: {}\n'.format(model_name, i + 1, model.fitted_pipeline_, ))
-            #     file.write('Train Accuracy: {}, Train F1: {}, Train Precision: {}, Train Recall: {}\n'.format(results[model_name]['Train Accuracy'][-1], results[model_name]['Train F1'][-1], results[model_name]['Train Precision'][-1], results[model_name]['Train Recall'][-1]))
-            #     file.write('Val Accuracy: {}, Val F1: {}, Val Precision: {}, Val Recall: {}\n'.format(results[model_name]['Val Accuracy'][-1], results[model_name]['Val F1'][-1], results[model_name]['Val Precision'][-1], results[model_name]['Val Recall'][-1]))
-            #     file.close()
-
     for model_name in models.keys():
         results[model_name]['Train Accuracy Stdev'] = np.std(results[model_name]['Train Accuracy Mean'])
         results[model_name]['Train Accuracy Median'] = np.median(sorted(results[model_name]['Train Accuracy Mean']))
@@ -257,7 +249,7 @@ def run(data_path, *args):
                'recall_weighted': weighted_recall_scorer}
     
     # --------- Define TPOT model --------- #
-    tpot = TPOTClassifier(generations = 50, population_size = 30, scoring = 'f1_weighted', verbosity=2, cv = skf, n_jobs=-1,
+    tpot = TPOTClassifier(generations = 2, population_size = 2, scoring = weighted_f1_scorer, verbosity=2, cv = skf, n_jobs=-1,
                                     random_state = seed, periodic_checkpoint_folder='/tpot_results')
 
     # ---- fit the model ---- #
@@ -300,8 +292,8 @@ def run(data_path, *args):
     return results
 
 # Generate configurations to be tested
-configs_dt = generate_configs_DT(n_models = 30)
-configs_rf = generate_configs_RF(n_models = 30)
+configs_dt = generate_configs_DT(n_models = 1)
+configs_rf = generate_configs_RF(n_models = 1)
 configs_gb = generate_configs_GB(n_models = 30)
 configs_ab = generate_configs_AB(n_models = 15)
 configs_svc = generate_configs_SVC(n_models = 21)
