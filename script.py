@@ -73,7 +73,7 @@ random.seed(0)
 seed = 0
 
 
-def run(data_path, *args):
+def run_cv(data_path, skf, *args):
     # ------------------------ Read data ------------------------ #
     data = pd.read_csv(data_path)
 
@@ -84,8 +84,6 @@ def run(data_path, *args):
 
     # ------------------------ Cross-validation ------------------------ #
     results = {}
-
-    skf = StratifiedKFold(n_splits = 10, shuffle = True, random_state = seed)
 
     for i, (train_idx, val_idx) in enumerate(skf.split(X, y)):
 
@@ -143,67 +141,72 @@ def run(data_path, *args):
 
         # If in the first split, initialize the results dict
         if i == 0:
-            for model_name in list(models.keys()) + ['TPOT']:
+            for model_name in list(models.keys()):
                 results[model_name] = {'Train Accuracy': [],
-                                       'Train Accuracy Mean': 0,
-                                       'Train Accuracy Median': 0,
-                                       'Train Accuracy Stdev': 0,
+                                    #    'Train Accuracy Mean': 0,
+                                    #    'Train Accuracy Median': 0,
+                                    #    'Train Accuracy Stdev': 0,
                                        'Train F1': [],
-                                       'Train F1 Mean': 0,
-                                       'Train F1 Median': 0,
-                                       'Train F1 Stdev': 0,
+                                    #    'Train F1 Mean': 0,
+                                    #    'Train F1 Median': 0,
+                                    #    'Train F1 Stdev': 0,
                                        'Train Precision': [],
-                                       'Train Precision Mean': 0,
-                                       'Train Precision Median': 0,
-                                       'Train Precision Stdev': 0,
+                                    #    'Train Precision Mean': 0,
+                                    #    'Train Precision Median': 0,
+                                    #    'Train Precision Stdev': 0,
                                        'Train Recall': [],
-                                       'Train Recall Mean': 0,
-                                        'Train Recall Median': 0,
-                                       'Train Recall Stdev': 0,
+                                    #    'Train Recall Mean': 0,
+                                        # 'Train Recall Median': 0,
+                                    #    'Train Recall Stdev': 0,
                                        'Val Accuracy': [],
-                                       'Val Accuracy Mean': 0,
-                                       'Val Accuracy Median': 0,
-                                       'Val Accuracy Stdev': 0,
+                                    #    'Val Accuracy Mean': 0,
+                                    #    'Val Accuracy Median': 0,
+                                    #    'Val Accuracy Stdev': 0,
                                        'Val F1': [],
-                                       'Val F1 Mean': 0,
-                                       'Val F1 Median': 0,
-                                       'Val F1 Stdev': 0,
+                                    #    'Val F1 Mean': 0,
+                                    #    'Val F1 Median': 0,
+                                    #    'Val F1 Stdev': 0,
                                        'Val Precision': [],
-                                       'Val Precision Mean': 0,
-                                       'Val Precision Median': 0,
-                                       'Val Precision Stdev': 0,
+                                    #    'Val Precision Mean': 0,
+                                    #    'Val Precision Median': 0,
+                                    #    'Val Precision Stdev': 0,
                                        'Val Recall': [],
-                                       'Val Recall Mean': 0,
-                                       'Val Recall Median': 0,
-                                       'Val Recall Stdev': 0}
+                                    #    'Val Recall Mean': 0,
+                                    #    'Val Recall Median': 0,
+                                    #    'Val Recall Stdev': 0
+                                    }
                 
         for model_name, model in models.items():
             
+            print('----------- TRAINING MODEL: {} -----------'.format(model_name))
             # Train
-            if model_name[:3] in ['KNN', 'MLP']:
-                print('----------- TRAINING MODEL: {} -----------'.format(model_name))
-                # print(model)
-                # TODO: Quando é KNN usamos só as features numéricas para calculatr os KNN ? 
+            if model_name[:3] == 'MLP':
                 model.fit(X_train, y_train)
+                # Evaluate
+                y_train_pred = model.predict(X_train)
+                y_val_pred = model.predict(X_val)
+            elif model_name[:3] == 'KNN':
+                model.fit(X_train[num_feats], y_train)
+                # Evaluate
+                y_train_pred = model.predict(X_train[num_feats])
+                y_val_pred = model.predict(X_val[num_feats])
             else:
-                print('----------- TRAINING MODEL: {} -----------'.format(model_name))
-                # print(model)
                 model.fit(X_train, y_train, sample_weights)
 
-            # Evaluate
-            y_train_pred = model.predict(X_train)
-            y_val_pred = model.predict(X_val)
+                # Evaluate
+                y_train_pred = model.predict(X_train)
+                y_val_pred = model.predict(X_val)
 
             # --------------------- Save Results ------------------- #
             results[model_name]['Train Accuracy'].append(accuracy_score(y_train, y_train_pred))
             results[model_name]['Train F1'].append(f1_score(y_train, y_train_pred, average = 'weighted'))
-            results[model_name]['Train Precision'].append(precision_score(y_train, y_train_pred, average = 'weighted'))
-            results[model_name]['Train Recall'].append(recall_score(y_train, y_train_pred, average = 'weighted'))
+            results[model_name]['Train Precision'].append(precision_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
+            results[model_name]['Train Recall'].append(recall_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
 
             results[model_name]['Val Accuracy'].append(accuracy_score(y_val, y_val_pred))
             results[model_name]['Val F1'].append(f1_score(y_val, y_val_pred, average = 'weighted'))
-            results[model_name]['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted'))
-            results[model_name]['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted'))
+            results[model_name]['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
+            results[model_name]['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
 
     for model_name in models.keys():
         results[model_name]['Train Accuracy Stdev'] = np.std(results[model_name]['Train Accuracy'])
@@ -231,9 +234,18 @@ def run(data_path, *args):
         results[model_name]['Val Recall Stdev'] = np.std(results[model_name]['Val Recall'])
         results[model_name]['Val Recall Median'] = np.median(sorted(results[model_name]['Val Recall']))
         results[model_name]['Val Recall Mean'] = np.mean(results[model_name]['Val Recall'])
-        
-    
-    # ------------------------------------------ TPOT ----------------------------------------- #
+
+    return results
+
+def run_tpot(results, data_path, skf):
+    data = pd.read_csv(data_path)
+
+    data.set_index('PUF_ID', inplace = True)
+
+    X = data.drop('fpl', axis = 1)
+    y = data['fpl']
+
+    results['TPOT'] = {}
 
     # ----------------- Sample weights ----------------- #
     sample_weights = X['finalwt']
@@ -251,7 +263,8 @@ def run(data_path, *args):
                'recall_weighted': weighted_recall_scorer}
     
     # ---------------- Define TPOT model --------------- #
-    tpot = TPOTClassifier(generations = 50, population_size = 30, scoring = weighted_f1_scorer, verbosity = 2,
+    # 50 30
+    tpot = TPOTClassifier(generations = 2, population_size = 2, scoring = weighted_f1_scorer, verbosity = 2,
                             cv = skf, n_jobs=-1, random_state = seed)
 
     # ---- fit the model ---- #
@@ -300,19 +313,22 @@ def run(data_path, *args):
     file.close()
 
     return results
+    
 
 # Generate configurations to be tested
-configs_dt = generate_configs_DT(n_models = 30)
-configs_rf = generate_configs_RF(n_models = 30)
-configs_gb = generate_configs_GB(n_models = 30)
-configs_ab = generate_configs_AB(n_models = 15)
-configs_svc = generate_configs_SVC(n_models = 21)
-configs_knn = generate_configs_KNN(n_models = 16)
-configs_mlp = generate_configs_MLP(n_models = 30)
+configs_dt = generate_configs_DT(n_models = 1)
+configs_rf = generate_configs_RF(n_models = 1)
+configs_gb = generate_configs_GB(n_models = 1)
+configs_ab = generate_configs_AB(n_models = 1) # 15
+configs_svc = generate_configs_SVC(n_models = 1) # 30
+configs_knn = generate_configs_KNN(n_models = 1) # 16
+configs_mlp = generate_configs_MLP(n_models = 1)
+
+skf = StratifiedKFold(n_splits = 10, shuffle = True, random_state = seed)
 
 start_time = time.time()
-res = run('data/preprocessed_data.csv', configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp)
-# res = run('data/preprocessed_data.csv', configs_dt, configs_rf)
+res = run_cv('data/preprocessed_data.csv', skf, configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp)
+res = run_tpot(res, 'data/preprocessed_data.csv', skf)
 
 print('Time elapsed: {} seconds'.format(time.time() - start_time))
 

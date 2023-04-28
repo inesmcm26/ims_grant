@@ -82,10 +82,11 @@ def generate_configs_AB(n_models):
 
 def generate_configs_SVC(n_models):
     kernels = ['linear', 'poly', 'rbf', 'sigmoid']
-    Cs = [0.1, 1, 10, 100]
+    Cs = [0.1, 1.0, 10.0, 100.0]
+    degrees = [2, 3, 4]
     gammas = [0.1, 1, 10, 100]
 
-    return get_random(n_models, kernels, Cs, gammas)
+    return get_random(n_models, kernels, Cs, degrees, gammas)
 
 def generate_configs_KNN(n_models):
     n_neighbors = [3, 5, 7, 9]
@@ -172,9 +173,10 @@ def generate_SVC(configs, class_weights, seed):
 
     for i, config in enumerate(configs):
         models['SVC ' + str(i+1)] = SVC(
-            C = config[0],
-            kernel = config[1],
+            kernel = config[0],
+            C = config[1],
             degree = config[2],
+            gamma = config[3],
             decision_function_shape = 'ovo',
             random_state = seed,
             class_weight = class_weights
@@ -205,7 +207,8 @@ def generate_MLP(configs, seed):
             alpha = config[1],
             batch_size = config[2],
             learning_rate_init = config[3],
-            random_state = seed
+            random_state = seed,
+            verbose = True
         )
 
     return models
@@ -229,43 +232,25 @@ def get_models(configs_dt = None, configs_rf = None, configs_gb = None, configs_
     rf = generate_RF(configs_rf, class_weights,seed)
     models.update(rf)
 
-    # # Gradient Boosting: 2160 possible combinations 30/50
-    # gb = generate_GB(configs_gb, seed = seed)
-    # models.update(gb)
+    # Gradient Boosting: 2160 possible combinations 30/50
+    gb = generate_GB(configs_gb, seed = seed)
+    models.update(gb)
 
-    # # Adaptive Boosting: 15 possible combinations
-    # ab = generate_AB(configs_ab, seed = seed)
-    # models.update(ab)
+    # Adaptive Boosting: 15 possible combinations
+    ab = generate_AB(configs_ab, seed = seed)
+    models.update(ab)
     
-    # # SVM: 21 possible combinations
-    # svc = generate_SVC(configs_svm, class_weights = class_weights, seed = seed)
-    # models.update(svc)
+    # SVM: 96 possible combinations
+    svc = generate_SVC(configs_svm, class_weights = class_weights, seed = seed)
+    models.update(svc)
 
-    # # KNN: atenção! só pode levar features numéricas
-    # # TODO: o que fazer ??
-    # knn = generate_KNN(configs_knn)
-    # models.update(knn)
+    # KNN: atenção! só pode levar features numéricas
+    # TODO: o que fazer ??
+    knn = generate_KNN(configs_knn)
+    models.update(knn)
     
-    # # Neural Network: 150 possible models NO SAMPLE_WEIGHT
-    # mlp = generate_MLP(configs_mlp, seed = seed)
-    # models.update(mlp)
-
-    # models['TPOT'] = TPOTClassifier(generations = 5, population_size = 5, scoring = 'f1_weighted', verbosity=2, cv=None, n_jobs=-1,
-    #                                 random_state = seed, periodic_checkpoint_folder='/tpot_results')
+    # Neural Network: 150 possible models NO SAMPLE_WEIGHT
+    mlp = generate_MLP(configs_mlp, seed = seed)
+    models.update(mlp)
 
     return models
-
-# class_weights = {1: 0.75, 2: 0.15, 3: 0.1}
-
-# configs_dt = generate_configs_DT(n_models = 1)
-# configs_rf = generate_configs_RF(n_models = 1)
-# configs_gb = generate_configs_GB(n_models = 150)
-# configs_ab = generate_configs_AB(n_models = 15)
-# configs_svc = generate_configs_SVC(n_models = 21)
-# configs_knn = generate_configs_KNN(n_models = 16)
-# configs_mlp = generate_configs_MLP(n_models = 150)
-
-# models = get_models(configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp, class_weights, seed = 0)
-# models2 = get_models(configs_dt, configs_rf, seed = 0)
-# print(models)
-# print(models2)
