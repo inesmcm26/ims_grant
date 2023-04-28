@@ -82,11 +82,6 @@ def run(data_path, *args):
     X = data.drop('fpl', axis = 1)
     y = data['fpl']
 
-    # # ------------------ Setup TPOT results file ----------------- #
-    # file = open('tpot_best_config.txt', 'a')
-    # file.write('TPOT Best Configurations Results:\n')
-    # file.close()
-
     # ------------------------ Cross-validation ------------------------ #
     results = {}
 
@@ -137,41 +132,48 @@ def run(data_path, *args):
 
         # save models configurations
         if i == 0:
-            file = open('/results/original/models_configs.txt', 'w')
+            file = open('results/original/models_configs.txt', 'w')
 
             for model_name, model in models.items():
                 file.write('{}: {}\n'.format(model_name, model.get_params()))
 
             file.close()
 
-        
         # --------------------- Train and Evaluate ------------------- #
 
         # If in the first split, initialize the results dict
         if i == 0:
             for model_name in list(models.keys()) + ['TPOT']:
-                results[model_name] = {'Train Accuracy Mean': [],
+                results[model_name] = {'Train Accuracy': [],
+                                       'Train Accuracy Mean': 0,
                                        'Train Accuracy Median': 0,
                                        'Train Accuracy Stdev': 0,
-                                       'Train F1 Mean': [],
+                                       'Train F1': [],
+                                       'Train F1 Mean': 0,
                                        'Train F1 Median': 0,
                                        'Train F1 Stdev': 0,
-                                       'Train Precision Mean': [],
+                                       'Train Precision': [],
+                                       'Train Precision Mean': 0,
                                        'Train Precision Median': 0,
                                        'Train Precision Stdev': 0,
-                                       'Train Recall Mean': [],
+                                       'Train Recall': [],
+                                       'Train Recall Mean': 0,
                                         'Train Recall Median': 0,
                                        'Train Recall Stdev': 0,
-                                       'Val Accuracy Mean': [],
+                                       'Val Accuracy': [],
+                                       'Val Accuracy Mean': 0,
                                        'Val Accuracy Median': 0,
                                        'Val Accuracy Stdev': 0,
-                                       'Val F1 Mean': [],
+                                       'Val F1': [],
+                                       'Val F1 Mean': 0,
                                        'Val F1 Median': 0,
                                        'Val F1 Stdev': 0,
-                                       'Val Precision Mean': [],
+                                       'Val Precision': [],
+                                       'Val Precision Mean': 0,
                                        'Val Precision Median': 0,
                                        'Val Precision Stdev': 0,
-                                       'Val Recall Mean': [],
+                                       'Val Recall': [],
+                                       'Val Recall Mean': 0,
                                        'Val Recall Median': 0,
                                        'Val Recall Stdev': 0}
                 
@@ -193,51 +195,51 @@ def run(data_path, *args):
             y_val_pred = model.predict(X_val)
 
             # --------------------- Save Results ------------------- #
-            results[model_name]['Train Accuracy Mean'].append(accuracy_score(y_train, y_train_pred))
-            results[model_name]['Train F1 Mean'].append(f1_score(y_train, y_train_pred, average = 'weighted'))
-            results[model_name]['Train Precision Mean'].append(precision_score(y_train, y_train_pred, average = 'weighted'))
-            results[model_name]['Train Recall Mean'].append(recall_score(y_train, y_train_pred, average = 'weighted'))
+            results[model_name]['Train Accuracy'].append(accuracy_score(y_train, y_train_pred))
+            results[model_name]['Train F1'].append(f1_score(y_train, y_train_pred, average = 'weighted'))
+            results[model_name]['Train Precision'].append(precision_score(y_train, y_train_pred, average = 'weighted'))
+            results[model_name]['Train Recall'].append(recall_score(y_train, y_train_pred, average = 'weighted'))
 
-            results[model_name]['Val Accuracy Mean'].append(accuracy_score(y_val, y_val_pred))
-            results[model_name]['Val F1 Mean'].append(f1_score(y_val, y_val_pred, average = 'weighted'))
-            results[model_name]['Val Precision Mean'].append(precision_score(y_val, y_val_pred, average = 'weighted'))
-            results[model_name]['Val Recall Mean'].append(recall_score(y_val, y_val_pred, average = 'weighted'))
+            results[model_name]['Val Accuracy'].append(accuracy_score(y_val, y_val_pred))
+            results[model_name]['Val F1'].append(f1_score(y_val, y_val_pred, average = 'weighted'))
+            results[model_name]['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted'))
+            results[model_name]['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted'))
 
     for model_name in models.keys():
-        results[model_name]['Train Accuracy Stdev'] = np.std(results[model_name]['Train Accuracy Mean'])
-        results[model_name]['Train Accuracy Median'] = np.median(sorted(results[model_name]['Train Accuracy Mean']))
-        results[model_name]['Train Accuracy Mean'] = np.mean(results[model_name]['Train Accuracy Mean'])
-        results[model_name]['Train F1 Stdev'] = np.std(results[model_name]['Train F1 Mean'])
-        results[model_name]['Train F1 Median'] = np.median(sorted(results[model_name]['Train F1 Mean']))
-        results[model_name]['Train F1 Mean'] = np.mean(results[model_name]['Train F1 Mean'])
-        results[model_name]['Train Precision Stdev'] = np.std(results[model_name]['Train Precision Mean'])
-        results[model_name]['Train Precision Median'] = np.median(sorted(results[model_name]['Train Precision Mean']))
-        results[model_name]['Train Precision Mean'] = np.mean(results[model_name]['Train Precision Mean'])
-        results[model_name]['Train Recall Stdev'] = np.std(results[model_name]['Train Recall Mean'])
-        results[model_name]['Train Recall Median'] = np.median(sorted(results[model_name]['Train Recall Mean']))
-        results[model_name]['Train Recall Mean'] = np.mean(results[model_name]['Train Recall Mean'])
+        results[model_name]['Train Accuracy Stdev'] = np.std(results[model_name]['Train Accuracy'])
+        results[model_name]['Train Accuracy Median'] = np.median(sorted(results[model_name]['Train Accuracy']))
+        results[model_name]['Train Accuracy Mean'] = np.mean(results[model_name]['Train Accuracy'])
+        results[model_name]['Train F1 Stdev'] = np.std(results[model_name]['Train F1'])
+        results[model_name]['Train F1 Median'] = np.median(sorted(results[model_name]['Train F1']))
+        results[model_name]['Train F1 Mean'] = np.mean(results[model_name]['Train F1'])
+        results[model_name]['Train Precision Stdev'] = np.std(results[model_name]['Train Precision'])
+        results[model_name]['Train Precision Median'] = np.median(sorted(results[model_name]['Train Precision']))
+        results[model_name]['Train Precision Mean'] = np.mean(results[model_name]['Train Precision'])
+        results[model_name]['Train Recall Stdev'] = np.std(results[model_name]['Train Recall'])
+        results[model_name]['Train Recall Median'] = np.median(sorted(results[model_name]['Train Recall']))
+        results[model_name]['Train Recall Mean'] = np.mean(results[model_name]['Train Recall'])
 
-        results[model_name]['Val Accuracy Stdev'] = np.std(results[model_name]['Val Accuracy Mean'])
-        results[model_name]['Val Accuracy Median'] = np.median(sorted(results[model_name]['Val Accuracy Mean']))
-        results[model_name]['Val Accuracy Mean'] = np.mean(results[model_name]['Val Accuracy Mean'])
-        results[model_name]['Val F1 Stdev'] = np.std(results[model_name]['Val F1 Mean'])
-        results[model_name]['Val F1 Median'] = np.median(sorted(results[model_name]['Val F1 Mean']))
-        results[model_name]['Val F1 Mean'] = np.mean(results[model_name]['Val F1 Mean'])
-        results[model_name]['Val Precision Stdev'] = np.std(results[model_name]['Val Precision Mean'])
-        results[model_name]['Val Precision Median'] = np.median(sorted(results[model_name]['Val Precision Mean']))
-        results[model_name]['Val Precision Mean'] = np.mean(results[model_name]['Val Precision Mean'])
-        results[model_name]['Val Recall Stdev'] = np.std(results[model_name]['Val Recall Mean'])
-        results[model_name]['Val Recall Median'] = np.median(sorted(results[model_name]['Val Recall Mean']))
-        results[model_name]['Val Recall Mean'] = np.mean(results[model_name]['Val Recall Mean'])
+        results[model_name]['Val Accuracy Stdev'] = np.std(results[model_name]['Val Accuracy'])
+        results[model_name]['Val Accuracy Median'] = np.median(sorted(results[model_name]['Val Accuracy']))
+        results[model_name]['Val Accuracy Mean'] = np.mean(results[model_name]['Val Accuracy'])
+        results[model_name]['Val F1 Stdev'] = np.std(results[model_name]['Val F1'])
+        results[model_name]['Val F1 Median'] = np.median(sorted(results[model_name]['Val F1']))
+        results[model_name]['Val F1 Mean'] = np.mean(results[model_name]['Val F1'])
+        results[model_name]['Val Precision Stdev'] = np.std(results[model_name]['Val Precision'])
+        results[model_name]['Val Precision Median'] = np.median(sorted(results[model_name]['Val Precision']))
+        results[model_name]['Val Precision Mean'] = np.mean(results[model_name]['Val Precision'])
+        results[model_name]['Val Recall Stdev'] = np.std(results[model_name]['Val Recall'])
+        results[model_name]['Val Recall Median'] = np.median(sorted(results[model_name]['Val Recall']))
+        results[model_name]['Val Recall Mean'] = np.mean(results[model_name]['Val Recall'])
         
     
     # ------------------------------------------ TPOT ----------------------------------------- #
 
-    # ---- sample weights ---- #
+    # ----------------- Sample weights ----------------- #
     sample_weights = X['finalwt']
     X.drop('finalwt', axis = 1, inplace = True)
 
-    # Define custom evaluation metrcis
+    # ----------- Custom evaluation metrics ------------ #
     weighted_accuracy_scorer = make_scorer(accuracy_score)
     weighted_f1_scorer = make_scorer(f1_score, average='weighted')
     weighted_precision_scorer = make_scorer(precision_score, average='weighted')
@@ -248,52 +250,60 @@ def run(data_path, *args):
                'precision_weighted': weighted_precision_scorer,
                'recall_weighted': weighted_recall_scorer}
     
-    # --------- Define TPOT model --------- #
-    tpot = TPOTClassifier(generations = 2, population_size = 2, scoring = weighted_f1_scorer, verbosity=2, cv = skf, n_jobs=-1,
-                                    random_state = seed, periodic_checkpoint_folder='/tpot_results')
+    # ---------------- Define TPOT model --------------- #
+    tpot = TPOTClassifier(generations = 50, population_size = 30, scoring = weighted_f1_scorer, verbosity = 2,
+                            cv = skf, n_jobs=-1, random_state = seed)
 
     # ---- fit the model ---- #
     tpot.fit(X, y, sample_weight = sample_weights)
 
     # calculate cv scores
-    cv_scores = cross_validate(tpot.fitted_pipeline_, X, y, cv=skf, scoring=scoring, return_train_score = True)
+    cv_scores = cross_validate(tpot.fitted_pipeline_, X, y, cv = skf, scoring = scoring, return_train_score = True)
 
+    results['TPOT']['Train Accuracy'] = cv_scores['train_accuracy']
     results['TPOT']['Train Accuracy Mean'] = cv_scores['train_accuracy'].mean()
     results['TPOT']['Train Accuracy Median'] = np.median(sorted(cv_scores['train_accuracy']))
     results['TPOT']['Train Accuracy Stdev'] = cv_scores['train_accuracy'].std()
+    results['TPOT']['Train Precision'] = cv_scores['train_precision_weighted']
     results['TPOT']['Train Precision Mean'] = cv_scores['train_precision_weighted'].mean()
     results['TPOT']['Train Precision Median'] = np.median(sorted(cv_scores['train_precision_weighted']))
     results['TPOT']['Train Precision Stdev'] = cv_scores['train_precision_weighted'].std()
+    results['TPOT']['Train Recall'] = cv_scores['train_recall_weighted']
     results['TPOT']['Train Recall Mean'] = cv_scores['train_recall_weighted'].mean()
     results['TPOT']['Train Recall Median'] = np.median(sorted(cv_scores['train_recall_weighted']))
     results['TPOT']['Train Recall Stdev'] = cv_scores['train_recall_weighted'].std()
+    results['TPOT']['Train F1'] = cv_scores['train_f1_weighted']
     results['TPOT']['Train F1 Mean'] = cv_scores['train_f1_weighted'].mean()
     results['TPOT']['Train F1 Median'] = np.median(sorted(cv_scores['train_f1_weighted']))
     results['TPOT']['Train F1 Stdev'] = cv_scores['train_f1_weighted'].std()
 
+    results['TPOT']['Val Accuracy'] = cv_scores['test_accuracy']
     results['TPOT']['Val Accuracy Mean'] = cv_scores['test_accuracy'].mean()
     results['TPOT']['Val Accuracy Median'] = np.median(sorted(cv_scores['test_accuracy']))
     results['TPOT']['Val Accuracy Stdev'] = cv_scores['test_precision_weighted'].std()
+    results['TPOT']['Val Precision'] = cv_scores['test_precision_weighted']
     results['TPOT']['Val Precision Mean'] = cv_scores['test_precision_weighted'].mean()
     results['TPOT']['Val Precision Median'] = np.median(sorted(cv_scores['test_precision_weighted']))
     results['TPOT']['Val Precision Stdev'] = cv_scores['test_precision_weighted'].std()
+    results['TPOT']['Val Recall'] = cv_scores['test_recall_weighted']
     results['TPOT']['Val Recall Mean'] = cv_scores['test_recall_weighted'].mean()
     results['TPOT']['Val Recall Median'] = np.median(sorted(cv_scores['test_recall_weighted']))
     results['TPOT']['Val Recall Stdev'] = cv_scores['test_recall_weighted'].std()
+    results['TPOT']['Val F1'] = cv_scores['test_f1_weighted']
     results['TPOT']['Val F1 Mean'] = cv_scores['test_f1_weighted'].mean()
     results['TPOT']['Val F1 Median'] = np.median(sorted(cv_scores['test_f1_weighted']))
     results['TPOT']['Val F1 Stdev'] = cv_scores['test_f1_weighted'].std()
 
-    tpot.export('/results/original/tpot_pipeline.py')
-    file = open('/results/original/models_configs.txt', 'a')
+    tpot.export('results/original/tpot_pipeline.py')
+    file = open('results/original/models_configs.txt', 'a')
     file.write('Best {} model\n'.format(tpot.fitted_pipeline_))
     file.close()
 
     return results
 
 # Generate configurations to be tested
-configs_dt = generate_configs_DT(n_models = 1)
-configs_rf = generate_configs_RF(n_models = 1)
+configs_dt = generate_configs_DT(n_models = 30)
+configs_rf = generate_configs_RF(n_models = 30)
 configs_gb = generate_configs_GB(n_models = 30)
 configs_ab = generate_configs_AB(n_models = 15)
 configs_svc = generate_configs_SVC(n_models = 21)
@@ -301,8 +311,8 @@ configs_knn = generate_configs_KNN(n_models = 16)
 configs_mlp = generate_configs_MLP(n_models = 30)
 
 start_time = time.time()
-# res = run('data/preprocessed_data.csv', configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp)
-res = run('data/preprocessed_data.csv', configs_dt, configs_rf)
+res = run('data/preprocessed_data.csv', configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp)
+# res = run('data/preprocessed_data.csv', configs_dt, configs_rf)
 
 print('Time elapsed: {} seconds'.format(time.time() - start_time))
 
