@@ -137,7 +137,7 @@ def run(data_path, *args):
 
         # save models configurations
         if i == 0:
-            file = open('models_configs.txt', 'w')
+            file = open('/results/original/models_configs.txt', 'w')
 
             for model_name, model in models.items():
                 file.write('{}: {}\n'.format(model_name, model.get_params()))
@@ -284,8 +284,8 @@ def run(data_path, *args):
     results['TPOT']['Val F1 Median'] = np.median(sorted(cv_scores['test_f1_weighted']))
     results['TPOT']['Val F1 Stdev'] = cv_scores['test_f1_weighted'].std()
 
-    tpot.export('tpot_pipeline.py')
-    file = open('models_configs.txt', 'a')
+    tpot.export('/results/original/tpot_pipeline.py')
+    file = open('/results/original/models_configs.txt', 'a')
     file.write('Best {} model\n'.format(tpot.fitted_pipeline_))
     file.close()
 
