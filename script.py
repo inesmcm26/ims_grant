@@ -245,8 +245,7 @@ def run_tpot(results, data_path, skf):
                'recall_weighted': weighted_recall_scorer}
     
     # ---------------- Define TPOT model --------------- #
-    # 50 30
-    tpot = TPOTClassifier(generations = 2, population_size = 2, scoring = weighted_f1_scorer, verbosity = 2,
+    tpot = TPOTClassifier(generations = 50, population_size = 30, scoring = weighted_f1_scorer, verbosity = 2,
                             cv = skf, n_jobs=-1, random_state = seed)
 
     # ---- fit the model ---- #
@@ -312,18 +311,18 @@ skf = StratifiedKFold(n_splits = 10, shuffle = True, random_state = seed)
 start_time = time.time()
 
 # Exec 1
-res = {}
-file = open('results/original/models_configs.txt', 'w')
-file.close()
-res = run_cv('data/data_one_hot.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab)
-res = pd.DataFrame.from_dict(res, orient = 'index')
-res.to_csv('results/original/scores.csv')
-
-# Exec 2
-# res = pd.read_csv('results/original/scores.csv', index_col = 0).to_dict(orient = 'index')
-# res = run_cv('data/data_one_hot.csv', res, skf, configs_svm = configs_svm, configs_knn = configs_knn, configs_mlp = configs_mlp)
+# res = {}
+# file = open('results/original/models_configs.txt', 'w')
+# file.close()
+# res = run_cv('data/data_one_hot.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab)
 # res = pd.DataFrame.from_dict(res, orient = 'index')
 # res.to_csv('results/original/scores.csv')
+
+# Exec 2
+res = pd.read_csv('results/original/scores.csv', index_col = 0).to_dict(orient = 'index')
+res = run_cv('data/data_one_hot.csv', res, skf, configs_svm = configs_svm, configs_knn = configs_knn, configs_mlp = configs_mlp)
+res = pd.DataFrame.from_dict(res, orient = 'index')
+res.to_csv('results/original/scores.csv')
 
 # # TPOT
 # res = pd.read_csv('results/original/scores.csv', index_col = 0).to_dict(orient = 'index')
