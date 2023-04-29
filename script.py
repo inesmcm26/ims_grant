@@ -311,23 +311,23 @@ skf = StratifiedKFold(n_splits = 10, shuffle = True, random_state = seed)
 start_time = time.time()
 
 # Exec 1
-# res = {}
-# file = open('results/original/models_configs.txt', 'w')
-# file.close()
-# res = run_cv('data/preprocessed_data.csv', res, skf, configs_dt, configs_rf, configs_gb, configs_ab)
-# res = pd.DataFrame.from_dict(res, orient = 'index')
-# res.to_csv('results/original/scores.csv')
+res = {}
+file = open('results/original/models_configs.txt', 'w')
+file.close()
+res = run_cv('data/data_one_hot.csv', res, skf, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab)
+res = pd.DataFrame.from_dict(res, orient = 'index')
+res.to_csv('results/original/scores.csv')
 
 # Exec 2
 # res = pd.read_csv('results/original/scores.csv').to_dict()
-# res = run_cv('data/preprocessed_data.csv', res, skf, configs_svc, configs_knn, configs_mlp)
+# res = run_cv('data/data_one_hot.csv', res, skf, configs_svc = configs_svc, configs_knn = configs_knn, configs_mlp = configs_mlp)
 # res = pd.DataFrame.from_dict(res, orient = 'index')
 # res.to_csv('results/original/scores.csv')
 
 # # TPOT
-res = pd.read_csv('results/original/scores.csv').to_dict()
-res = run_tpot(res, 'data/preprocessed_data.csv', skf)
-res = pd.DataFrame.from_dict(res, orient = 'index')
-res.to_csv('results/original/scores.csv')
+# res = pd.read_csv('results/original/scores.csv').to_dict()
+# res = run_tpot(res, 'data/data_one_hot.csv', skf)
+# res = pd.DataFrame.from_dict(res, orient = 'index')
+# res.to_csv('results/original/scores.csv')
 
 print('Time elapsed: {} seconds'.format(time.time() - start_time))
