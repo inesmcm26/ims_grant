@@ -224,33 +224,39 @@ def get_models(configs_dt = None, configs_rf = None, configs_gb = None, configs_
     'Logistic Regression 2': LogisticRegression(multi_class = 'multinomial', solver = 'sag', class_weight = class_weights, random_state = seed),
     }
 
-    # Decision Tree: 150 possible models class_weight = {class_label: weight}
-    dt = generate_DT(configs_dt, class_weights, seed)
-    models.update(dt)
+    if configs_dt != None:
+        # Decision Tree: 150 possible models class_weight = {class_label: weight}
+        dt = generate_DT(configs_dt, class_weights, seed)
+        models.update(dt)
 
-    # Random Forest: 2880 possible models class_weight = {class_label: weight}
-    rf = generate_RF(configs_rf, class_weights,seed)
-    models.update(rf)
+    if configs_rf != None:
+        # Random Forest: 2880 possible models class_weight = {class_label: weight}
+        rf = generate_RF(configs_rf, class_weights,seed)
+        models.update(rf)
 
-    # Gradient Boosting: 2160 possible combinations 30/50
-    gb = generate_GB(configs_gb, seed = seed)
-    models.update(gb)
+    if configs_gb != None:
+        # Gradient Boosting: 2160 possible combinations 30/50
+        gb = generate_GB(configs_gb, seed = seed)
+        models.update(gb)
 
-    # Adaptive Boosting: 15 possible combinations
-    ab = generate_AB(configs_ab, seed = seed)
-    models.update(ab)
+    if configs_ab != None:
+        # Adaptive Boosting: 15 possible combinations
+        ab = generate_AB(configs_ab, seed = seed)
+        models.update(ab)
     
-    # SVM: 96 possible combinations
-    svc = generate_SVC(configs_svm, class_weights = class_weights, seed = seed)
-    models.update(svc)
+    if configs_svm != None:
+        # SVM: 96 possible combinations
+        svc = generate_SVC(configs_svm, class_weights = class_weights, seed = seed)
+        models.update(svc)
 
-    # KNN: atenção! só pode levar features numéricas
-    # TODO: o que fazer ??
-    knn = generate_KNN(configs_knn)
-    models.update(knn)
+    if configs_knn != None:
+        # KNN: 16 possible combinations
+        knn = generate_KNN(configs_knn)
+        models.update(knn)
     
-    # Neural Network: 150 possible models NO SAMPLE_WEIGHT
-    mlp = generate_MLP(configs_mlp, seed = seed)
-    models.update(mlp)
+    if configs_mlp != None:
+        # Neural Network: 150 possible models NO SAMPLE_WEIGHT
+        mlp = generate_MLP(configs_mlp, seed = seed)
+        models.update(mlp)
 
     return models

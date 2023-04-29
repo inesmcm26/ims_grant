@@ -73,7 +73,9 @@ random.seed(0)
 seed = 0
 
 
-def run_cv(data_path, skf, *args):
+def run_cv(data_path, results, skf, configs_dt = None, configs_rf = None,
+            configs_gb = None, configs_ab = None, configs_svm = None,
+            configs_knn = None, configs_mlp = None):
     # ------------------------ Read data ------------------------ #
     data = pd.read_csv(data_path)
 
@@ -83,7 +85,6 @@ def run_cv(data_path, skf, *args):
     y = data['fpl']
 
     # ------------------------ Cross-validation ------------------------ #
-    results = {}
 
     for i, (train_idx, val_idx) in enumerate(skf.split(X, y)):
 
@@ -126,11 +127,12 @@ def run_cv(data_path, skf, *args):
         X_val = pd.concat([X_val_num, X_val_cat], axis = 1)
 
         # --------------------- Generate Models ------------------- #
-        models = get_models(*args, class_weights = weights, seed = seed)
+        models = get_models(configs_dt , configs_rf , configs_gb , configs_ab , configs_svm , configs_knn,
+               configs_mlp, class_weights = weights, seed = seed)
 
         # save models configurations
         if i == 0:
-            file = open('results/original/models_configs.txt', 'w')
+            file = open('results/original/models_configs.txt', 'a')
 
             for model_name, model in models.items():
                 file.write('{}: {}\n'.format(model_name, model.get_params()))
@@ -142,39 +144,19 @@ def run_cv(data_path, skf, *args):
         # If in the first split, initialize the results dict
         if i == 0:
             for model_name in list(models.keys()):
-                results[model_name] = {'Train Accuracy': [],
-                                    #    'Train Accuracy Mean': 0,
-                                    #    'Train Accuracy Median': 0,
-                                    #    'Train Accuracy Stdev': 0,
-                                       'Train F1': [],
-                                    #    'Train F1 Mean': 0,
-                                    #    'Train F1 Median': 0,
-                                    #    'Train F1 Stdev': 0,
-                                       'Train Precision': [],
-                                    #    'Train Precision Mean': 0,
-                                    #    'Train Precision Median': 0,
-                                    #    'Train Precision Stdev': 0,
-                                       'Train Recall': [],
-                                    #    'Train Recall Mean': 0,
-                                        # 'Train Recall Median': 0,
-                                    #    'Train Recall Stdev': 0,
-                                       'Val Accuracy': [],
-                                    #    'Val Accuracy Mean': 0,
-                                    #    'Val Accuracy Median': 0,
-                                    #    'Val Accuracy Stdev': 0,
-                                       'Val F1': [],
-                                    #    'Val F1 Mean': 0,
-                                    #    'Val F1 Median': 0,
-                                    #    'Val F1 Stdev': 0,
-                                       'Val Precision': [],
-                                    #    'Val Precision Mean': 0,
-                                    #    'Val Precision Median': 0,
-                                    #    'Val Precision Stdev': 0,
-                                       'Val Recall': [],
-                                    #    'Val Recall Mean': 0,
-                                    #    'Val Recall Median': 0,
-                                    #    'Val Recall Stdev': 0
-                                    }
+                results[model_name] = {
+                    'Train Accuracy': [],
+                    'Train F1': [],
+                    'Train Precision': [],
+                    'Train Recall': [],
+
+                    'Val Accuracy': [],
+                    'Val F1': [],
+                    'Val Precision': [],
+                    'Val Recall': [],
+                    }
+                                    
+                                    
                 
         for model_name, model in models.items():
             
@@ -327,10 +309,25 @@ configs_mlp = generate_configs_MLP(n_models = 1)
 skf = StratifiedKFold(n_splits = 10, shuffle = True, random_state = seed)
 
 start_time = time.time()
-res = run_cv('data/preprocessed_data.csv', skf, configs_dt, configs_rf, configs_gb, configs_ab, configs_svc, configs_knn, configs_mlp)
+
+# Exec 1
+# res = {}
+# file = open('results/original/models_configs.txt', 'w')
+# file.close()
+# res = run_cv('data/preprocessed_data.csv', res, skf, configs_dt, configs_rf, configs_gb, configs_ab)
+# res = pd.DataFrame.from_dict(res, orient = 'index')
+# res.to_csv('results/original/scores.csv')
+
+# Exec 2
+# res = pd.read_csv('results/original/scores.csv').to_dict()
+# res = run_cv('data/preprocessed_data.csv', res, skf, configs_svc, configs_knn, configs_mlp)
+# res = pd.DataFrame.from_dict(res, orient = 'index')
+# res.to_csv('results/original/scores.csv')
+
+# # TPOT
+res = pd.read_csv('results/original/scores.csv').to_dict()
 res = run_tpot(res, 'data/preprocessed_data.csv', skf)
+res = pd.DataFrame.from_dict(res, orient = 'index')
+res.to_csv('results/original/scores.csv')
 
 print('Time elapsed: {} seconds'.format(time.time() - start_time))
-
-res = pd.DataFrame.from_dict(res, orient = 'index')
-res.to_csv('results/results_original.csv')
