@@ -213,7 +213,7 @@ def generate_MLP(configs, seed):
 
     return models
 
-def generate_LR(seed, class_weights):
+def create_LR(seed, class_weights):
     models = {
     # Logistic Regression: 2 models {class_label: weight}
     'Logistic Regression 1': LogisticRegression(multi_class = 'multinomial', solver = 'lbfgs', class_weight = class_weights, random_state = seed),
@@ -229,7 +229,7 @@ def get_models(generate_LR = False, configs_dt = None, configs_rf = None, config
     models = {}
 
     if generate_LR == True:
-        models.update(generate_LR(seed), class_weights)
+        models.update(create_LR(seed, class_weights))
 
     if configs_dt != None:
         # Decision Tree: 150 possible models class_weight = {class_label: weight}

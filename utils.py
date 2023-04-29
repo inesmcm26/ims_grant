@@ -3,7 +3,7 @@ import pandas as pd
 
 def scale(X_train_num, X_val_num):
     # Use StandardScaler for gaussian features
-    gaussian_feats = ['PPEDUC','DISTRESS','MATERIALISM_1','MATERIALISM_2','ASK1_2','FSscore','FWBscore']
+    gaussian_feats = ['PPEDUC', 'DISTRESS', 'MATERIALISM_1', 'MATERIALISM_2', 'ASK1_2', 'PROPPLAN_4', 'FSscore', 'FWBscore']
 
     scaler = StandardScaler()
     # Fit scaler to training data
@@ -13,7 +13,7 @@ def scale(X_train_num, X_val_num):
     gaussian_scaled_val = pd.DataFrame(scaler.transform(X_val_num[gaussian_feats]), columns = gaussian_feats, index = X_val_num.index)
 
     # Use MinMaxScaler for non-gaussian features
-    non_gaussian = list(set(X_train_num.columns) - set(['PPEDUC','DISTRESS','MATERIALISM_1','MATERIALISM_2','ASK1_2','FSscore','FWBscore']))
+    non_gaussian = list(set(X_train_num.columns) - set(['PPEDUC', 'DISTRESS', 'MATERIALISM_1', 'MATERIALISM_2', 'ASK1_2', 'PROPPLAN_4', 'FSscore', 'FWBscore']))
 
     scaler = MinMaxScaler()
     # Fit scaler to training data

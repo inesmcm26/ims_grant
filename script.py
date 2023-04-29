@@ -24,9 +24,9 @@
 # for each split:
 #   calcular sample weights
 #   calcular class weights
-#   missing values(?)
 #   scale numerical features
 #   (feature selection)
+#   one hot categorical variables
 #   for each algoritmo (e set de parâmetros):
 #       treinar em X_train, y_train (com sample weights)
 #       testar em y_train_pred, y_train (com class weights)
@@ -313,23 +313,23 @@ skf = StratifiedKFold(n_splits = 10, shuffle = True, random_state = seed)
 start_time = time.time()
 
 # Exec 1
-res = {}
-file = open('results/original/models_configs.txt', 'w')
-file.close()
-res = run_cv('data/data_one_hot.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab)
-res = pd.DataFrame.from_dict(res, orient = 'index')
-res.to_csv('results/original/scores.csv')
-
-# Exec 2
-res = pd.read_csv('results/original/scores.csv').to_dict()
-res = run_cv('data/data_one_hot.csv', res, skf, configs_svm = configs_svm, configs_knn = configs_knn, configs_mlp = configs_mlp)
-res = pd.DataFrame.from_dict(res, orient = 'index')
-res.to_csv('results/original/scores.csv')
-
-# # TPOT
-# res = pd.read_csv('results/original/scores.csv').to_dict()
-# res = run_tpot(res, 'data/data_one_hot.csv', skf)
+# res = {}
+# file = open('results/original/models_configs.txt', 'w')
+# file.close()
+# res = run_cv('data/data_one_hot.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab)
 # res = pd.DataFrame.from_dict(res, orient = 'index')
 # res.to_csv('results/original/scores.csv')
+
+# Exec 2
+# res = pd.read_csv('results/original/scores.csv', index_col = 0).to_dict(orient = 'index')
+# res = run_cv('data/data_one_hot.csv', res, skf, configs_svm = configs_svm, configs_knn = configs_knn, configs_mlp = configs_mlp)
+# res = pd.DataFrame.from_dict(res, orient = 'index')
+# res.to_csv('results/original/scores.csv')
+
+# # TPOT
+res = pd.read_csv('results/original/scores.csv', index_col = 0).to_dict(orient = 'index')
+res = run_tpot(res, 'data/data_one_hot.csv', skf)
+res = pd.DataFrame.from_dict(res, orient = 'index')
+res.to_csv('results/original/scores.csv')
 
 print('Time elapsed: {} seconds'.format(time.time() - start_time))
