@@ -73,7 +73,7 @@ random.seed(0)
 seed = 0
 
 
-def run_cv(data_path, results, skf, configs_dt = None, configs_rf = None,
+def run_cv(data_path, results, skf, generate_LR = False, configs_dt = None, configs_rf = None,
             configs_gb = None, configs_ab = None, configs_svm = None,
             configs_knn = None, configs_mlp = None):
     # ------------------------ Read data ------------------------ #
@@ -127,7 +127,7 @@ def run_cv(data_path, results, skf, configs_dt = None, configs_rf = None,
         X_val = pd.concat([X_val_num, X_val_cat], axis = 1)
 
         # --------------------- Generate Models ------------------- #
-        models = get_models(configs_dt , configs_rf , configs_gb , configs_ab , configs_svm , configs_knn,
+        models = get_models(generate_LR, configs_dt , configs_rf , configs_gb , configs_ab , configs_svm , configs_knn,
                configs_mlp, class_weights = weights, seed = seed)
 
         # save models configurations
@@ -298,11 +298,13 @@ def run_tpot(results, data_path, skf):
     
 
 # Generate configurations to be tested
+
+generate_LR = True
 configs_dt = generate_configs_DT(n_models = 1)
 configs_rf = generate_configs_RF(n_models = 1)
 configs_gb = generate_configs_GB(n_models = 1)
 configs_ab = generate_configs_AB(n_models = 1) # 15
-configs_svc = generate_configs_SVC(n_models = 1) # 30
+configs_svm = generate_configs_SVC(n_models = 1) # 30
 configs_knn = generate_configs_KNN(n_models = 1) # 16
 configs_mlp = generate_configs_MLP(n_models = 1)
 
@@ -314,15 +316,15 @@ start_time = time.time()
 res = {}
 file = open('results/original/models_configs.txt', 'w')
 file.close()
-res = run_cv('data/data_one_hot.csv', res, skf, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab)
+res = run_cv('data/data_one_hot.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab)
 res = pd.DataFrame.from_dict(res, orient = 'index')
 res.to_csv('results/original/scores.csv')
 
 # Exec 2
-# res = pd.read_csv('results/original/scores.csv').to_dict()
-# res = run_cv('data/data_one_hot.csv', res, skf, configs_svc = configs_svc, configs_knn = configs_knn, configs_mlp = configs_mlp)
-# res = pd.DataFrame.from_dict(res, orient = 'index')
-# res.to_csv('results/original/scores.csv')
+res = pd.read_csv('results/original/scores.csv').to_dict()
+res = run_cv('data/data_one_hot.csv', res, skf, configs_svm = configs_svm, configs_knn = configs_knn, configs_mlp = configs_mlp)
+res = pd.DataFrame.from_dict(res, orient = 'index')
+res.to_csv('results/original/scores.csv')
 
 # # TPOT
 # res = pd.read_csv('results/original/scores.csv').to_dict()

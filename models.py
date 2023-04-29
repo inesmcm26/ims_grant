@@ -213,16 +213,23 @@ def generate_MLP(configs, seed):
 
     return models
 
-
-def get_models(configs_dt = None, configs_rf = None, configs_gb = None, configs_ab = None, configs_svm = None, configs_knn = None,
-               configs_mlp = None, class_weights = None, seed = None):
-
-    # 624 model configurations + TPOT = 625 models
+def generate_LR(seed, class_weights):
     models = {
     # Logistic Regression: 2 models {class_label: weight}
     'Logistic Regression 1': LogisticRegression(multi_class = 'multinomial', solver = 'lbfgs', class_weight = class_weights, random_state = seed),
     'Logistic Regression 2': LogisticRegression(multi_class = 'multinomial', solver = 'sag', class_weight = class_weights, random_state = seed),
     }
+
+    return models
+
+
+def get_models(generate_LR = False, configs_dt = None, configs_rf = None, configs_gb = None, configs_ab = None, configs_svm = None, configs_knn = None,
+               configs_mlp = None, class_weights = None, seed = None):
+
+    models = {}
+
+    if generate_LR == True:
+        models.update(generate_LR(seed), class_weights)
 
     if configs_dt != None:
         # Decision Tree: 150 possible models class_weight = {class_label: weight}
