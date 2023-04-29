@@ -296,7 +296,6 @@ def run_tpot(results, data_path, skf):
 
     return results
     
-
 # Generate configurations to be tested
 
 generate_LR = True
