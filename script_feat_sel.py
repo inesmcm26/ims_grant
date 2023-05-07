@@ -105,131 +105,137 @@ def run_cv(data_path, results, skf, min_feats = 70, tol = 0.01, generate_LR = Fa
         for feat in selected_features:
             feat_sel[f'Split {i + 1}'][feat] = 1
 
-        # Save selected features in each split
-        file = open('results/feat_sel/selected_features.txt', 'a')
-        file.write('Split {} | Nr of selected features: {}\n'.format(i + 1, len(selected_features)))
-        file.write('Features: {}\n'.format(selected_features))
-        file.write('-----------------------------------------------------------\n')
-        file.close()
-    
+        # drop the features that were not selected
+        X_train = X_train[selected_features]
+        X_val = X_val[selected_features]
+
+        # -------------------- One hot encoding ------------------- #
+        cat_feats = ['sample', 'FINGOALS', 'AUTOMATED_1', 'AUTOMATED_2',
+             'HOUSING', 'LIVINGARRANGEMENT', 'SNAP', 'FRAUD2',
+             'COVERCOSTS', 'MANAGE2', 'RETIRE', 'generation',
+             'PPETHM', 'PPMARIT', 'PPREG9']
+        
+        for feat in cat_feats:
+            if feat not in selected_features:
+                cat_feats.remove(feat)
+
+        X_train = pd.get_dummies(X_train, columns = cat_feats, drop_first = True)
+        X_val = pd.get_dummies(X_val, columns = cat_feats, drop_first = True)
+
+        # -------------- Split numerical and nominal -------------- #
+        
+        cat_feats = list(X_train.columns[X_train.nunique() == 2])
+        num_feats = list(X_train.columns[X_train.nunique() > 2])
+
+        X_train_num = X_train[num_feats]
+        X_train_cat = X_train[cat_feats]
+
+        X_val_num = X_val[num_feats]
+        X_val_cat = X_val[cat_feats]
+
+        # ------------------------ Scaling ------------------------ #
+        X_train_num, X_val_num = scale(X_train_num, X_val_num)
+
+        # --------------------- Concatenate ------------------- #
+        X_train = pd.concat([X_train_num, X_train_cat], axis = 1)
+        X_val = pd.concat([X_val_num, X_val_cat], axis = 1)
+
+        # --------------------- Generate Models ------------------- #
+        models = get_models(generate_LR, configs_dt , configs_rf , configs_gb , configs_ab , configs_svm , configs_knn,
+               configs_mlp, class_weights = weights, seed = seed)
+
+        # save models configurations
+        if i == 0:
+            file = open('results/feat_sel/models_configs.txt', 'a')
+
+            for model_name, model in models.items():
+                file.write('{}: {}\n'.format(model_name, model.get_params()))
+
+            file.close()
+
+        # --------------------- Train and Evaluate ------------------- #
+
+        # If in the first split, initialize the results dict
+        if i == 0:
+            for model_name in list(models.keys()):
+                results[model_name + 'FEAT SEL'] = {
+                    'Train Accuracy': [],
+                    'Train F1': [],
+                    'Train Precision': [],
+                    'Train Recall': [],
+
+                    'Val Accuracy': [],
+                    'Val F1': [],
+                    'Val Precision': [],
+                    'Val Recall': [],
+                    }
+
+
+        for model_name, model in models.items():
+            
+            print('----------- TRAINING MODEL: {} -----------'.format(model_name))
+            # Train
+            if model_name[:3] == 'MLP':
+                model.fit(X_train, y_train)
+                # Evaluate
+                y_train_pred = model.predict(X_train)
+                y_val_pred = model.predict(X_val)
+            elif model_name[:3] == 'KNN':
+                model.fit(X_train[num_feats], y_train)
+                # Evaluate
+                y_train_pred = model.predict(X_train[num_feats])
+                y_val_pred = model.predict(X_val[num_feats])
+            else:
+                model.fit(X_train, y_train, sample_weights)
+
+                # Evaluate
+                y_train_pred = model.predict(X_train)
+                y_val_pred = model.predict(X_val)
+
+            # --------------------- Save Results ------------------- #
+            results[model_name + 'FEAT SEL']['Train Accuracy'].append(accuracy_score(y_train, y_train_pred))
+            results[model_name + 'FEAT SEL']['Train F1'].append(f1_score(y_train, y_train_pred, average = 'weighted'))
+            results[model_name + 'FEAT SEL']['Train Precision'].append(precision_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
+            results[model_name + 'FEAT SEL']['Train Recall'].append(recall_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
+
+            results[model_name + 'FEAT SEL']['Val Accuracy'].append(accuracy_score(y_val, y_val_pred))
+            results[model_name + 'FEAT SEL']['Val F1'].append(f1_score(y_val, y_val_pred, average = 'weighted'))
+            results[model_name + 'FEAT SEL']['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
+            results[model_name + 'FEAT SEL']['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
+
+    # -------------------- Save Feature Selection Results ----------------------- #
     feat_sel_res = pd.DataFrame.from_dict(feat_sel, orient = 'index')
     feat_sel_res.to_csv('results/feat_sel/selected_features.csv')
 
-    return 0
+    # ------------- Calculate Mean, Median and Stdev for each metric ------------ #
+    for model_name in models.keys():
+        results[model_name + 'FEAT SEL']['Train Accuracy Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train Accuracy'])
+        results[model_name + 'FEAT SEL']['Train Accuracy Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train Accuracy']))
+        results[model_name + 'FEAT SEL']['Train Accuracy Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train Accuracy'])
+        results[model_name + 'FEAT SEL']['Train F1 Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train F1'])
+        results[model_name + 'FEAT SEL']['Train F1 Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train F1']))
+        results[model_name + 'FEAT SEL']['Train F1 Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train F1'])
+        results[model_name + 'FEAT SEL']['Train Precision Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train Precision'])
+        results[model_name + 'FEAT SEL']['Train Precision Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train Precision']))
+        results[model_name + 'FEAT SEL']['Train Precision Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train Precision'])
+        results[model_name + 'FEAT SEL']['Train Recall Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train Recall'])
+        results[model_name + 'FEAT SEL']['Train Recall Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train Recall']))
+        results[model_name + 'FEAT SEL']['Train Recall Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train Recall'])
 
-    #     # -------------------- One hot encoding ------------------- #
-    #     # TODO
+        results[model_name + 'FEAT SEL']['Val Accuracy Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val Accuracy'])
+        results[model_name + 'FEAT SEL']['Val Accuracy Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val Accuracy']))
+        results[model_name + 'FEAT SEL']['Val Accuracy Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val Accuracy'])
+        results[model_name + 'FEAT SEL']['Val F1 Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val F1'])
+        results[model_name + 'FEAT SEL']['Val F1 Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val F1']))
+        results[model_name + 'FEAT SEL']['Val F1 Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val F1'])
+        results[model_name + 'FEAT SEL']['Val Precision Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val Precision'])
+        results[model_name + 'FEAT SEL']['Val Precision Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val Precision']))
+        results[model_name + 'FEAT SEL']['Val Precision Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val Precision'])
+        results[model_name + 'FEAT SEL']['Val Recall Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val Recall'])
+        results[model_name + 'FEAT SEL']['Val Recall Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val Recall']))
+        results[model_name + 'FEAT SEL']['Val Recall Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val Recall'])
 
-    #     # -------------- Split numerical and nominal -------------- #
-        
-    #     cat_feats = list(X_train.columns[X_train.nunique() == 2])
-    #     num_feats = list(X_train.columns[X_train.nunique() > 2])
-
-
-    #     X_train_num = X_train[num_feats]
-    #     X_train_cat = X_train[cat_feats]
-
-    #     X_val_num = X_val[num_feats]
-    #     X_val_cat = X_val[cat_feats]
-
-    #     # ------------------------ Scaling ------------------------ #
-    #     X_train_num, X_val_num = scale(X_train_num, X_val_num)
-
-    #     # --------------------- Concatenate ------------------- #
-    #     X_train = pd.concat([X_train_num, X_train_cat], axis = 1)
-    #     X_val = pd.concat([X_val_num, X_val_cat], axis = 1)
-
-    #     # --------------------- Generate Models ------------------- #
-    #     models = get_models(generate_LR, configs_dt , configs_rf , configs_gb , configs_ab , configs_svm , configs_knn,
-    #            configs_mlp, class_weights = weights, seed = seed)
-
-    #     # save models configurations
-    #     if i == 0:
-    #         file = open('results/feat_sel/models_configs.txt', 'a')
-
-    #         for model_name, model in models.items():
-    #             file.write('{}: {}\n'.format(model_name, model.get_params()))
-
-    #         file.close()
-
-    #     # --------------------- Train and Evaluate ------------------- #
-
-    #     # If in the first split, initialize the results dict
-    #     if i == 0:
-    #         for model_name in list(models.keys()):
-    #             results[model_name + 'FEAT SEL'] = {
-    #                 'Train Accuracy': [],
-    #                 'Train F1': [],
-    #                 'Train Precision': [],
-    #                 'Train Recall': [],
-
-    #                 'Val Accuracy': [],
-    #                 'Val F1': [],
-    #                 'Val Precision': [],
-    #                 'Val Recall': [],
-    #                 }
-
-
-    #     for model_name, model in models.items():
-            
-    #         print('----------- TRAINING MODEL: {} -----------'.format(model_name))
-    #         # Train
-    #         if model_name[:3] == 'MLP':
-    #             model.fit(X_train, y_train)
-    #             # Evaluate
-    #             y_train_pred = model.predict(X_train)
-    #             y_val_pred = model.predict(X_val)
-    #         elif model_name[:3] == 'KNN':
-    #             model.fit(X_train[num_feats], y_train)
-    #             # Evaluate
-    #             y_train_pred = model.predict(X_train[num_feats])
-    #             y_val_pred = model.predict(X_val[num_feats])
-    #         else:
-    #             model.fit(X_train, y_train, sample_weights)
-
-    #             # Evaluate
-    #             y_train_pred = model.predict(X_train)
-    #             y_val_pred = model.predict(X_val)
-
-    #         # --------------------- Save Results ------------------- #
-    #         results[model_name + 'FEAT SEL']['Train Accuracy'].append(accuracy_score(y_train, y_train_pred))
-    #         results[model_name + 'FEAT SEL']['Train F1'].append(f1_score(y_train, y_train_pred, average = 'weighted'))
-    #         results[model_name + 'FEAT SEL']['Train Precision'].append(precision_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
-    #         results[model_name + 'FEAT SEL']['Train Recall'].append(recall_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
-
-    #         results[model_name + 'FEAT SEL']['Val Accuracy'].append(accuracy_score(y_val, y_val_pred))
-    #         results[model_name + 'FEAT SEL']['Val F1'].append(f1_score(y_val, y_val_pred, average = 'weighted'))
-    #         results[model_name + 'FEAT SEL']['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
-    #         results[model_name + 'FEAT SEL']['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
-
-    # for model_name in models.keys():
-    #     results[model_name + 'FEAT SEL']['Train Accuracy Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train Accuracy'])
-    #     results[model_name + 'FEAT SEL']['Train Accuracy Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train Accuracy']))
-    #     results[model_name + 'FEAT SEL']['Train Accuracy Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train Accuracy'])
-    #     results[model_name + 'FEAT SEL']['Train F1 Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train F1'])
-    #     results[model_name + 'FEAT SEL']['Train F1 Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train F1']))
-    #     results[model_name + 'FEAT SEL']['Train F1 Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train F1'])
-    #     results[model_name + 'FEAT SEL']['Train Precision Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train Precision'])
-    #     results[model_name + 'FEAT SEL']['Train Precision Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train Precision']))
-    #     results[model_name + 'FEAT SEL']['Train Precision Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train Precision'])
-    #     results[model_name + 'FEAT SEL']['Train Recall Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train Recall'])
-    #     results[model_name + 'FEAT SEL']['Train Recall Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train Recall']))
-    #     results[model_name + 'FEAT SEL']['Train Recall Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train Recall'])
-
-    #     results[model_name + 'FEAT SEL']['Val Accuracy Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val Accuracy'])
-    #     results[model_name + 'FEAT SEL']['Val Accuracy Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val Accuracy']))
-    #     results[model_name + 'FEAT SEL']['Val Accuracy Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val Accuracy'])
-    #     results[model_name + 'FEAT SEL']['Val F1 Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val F1'])
-    #     results[model_name + 'FEAT SEL']['Val F1 Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val F1']))
-    #     results[model_name + 'FEAT SEL']['Val F1 Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val F1'])
-    #     results[model_name + 'FEAT SEL']['Val Precision Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val Precision'])
-    #     results[model_name + 'FEAT SEL']['Val Precision Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val Precision']))
-    #     results[model_name + 'FEAT SEL']['Val Precision Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val Precision'])
-    #     results[model_name + 'FEAT SEL']['Val Recall Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val Recall'])
-    #     results[model_name + 'FEAT SEL']['Val Recall Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val Recall']))
-    #     results[model_name + 'FEAT SEL']['Val Recall Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val Recall'])
-
-    # return results
+    return results
 
 
     
