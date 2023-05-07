@@ -116,9 +116,14 @@ def run_cv(data_path, results, skf, min_feats = 70, tol = 0.01, generate_LR = Fa
              'COVERCOSTS', 'MANAGE2', 'RETIRE', 'generation',
              'PPETHM', 'PPMARIT', 'PPREG9']
         
+        # remove features from list if they were not selected by rfe
+        to_remove = []
         for feat in cat_feats:
             if feat not in selected_features:
-                cat_feats.remove(feat)
+                to_remove.append(feat)
+
+        for feat in to_remove:
+            cat_feats.remove(feat)
 
         X_train = pd.get_dummies(X_train, columns = cat_feats, drop_first = True)
         X_val = pd.get_dummies(X_val, columns = cat_feats, drop_first = True)
@@ -159,7 +164,7 @@ def run_cv(data_path, results, skf, min_feats = 70, tol = 0.01, generate_LR = Fa
         # If in the first split, initialize the results dict
         if i == 0:
             for model_name in list(models.keys()):
-                results[model_name + 'FEAT SEL'] = {
+                results[model_name + ' FEAT SEL'] = {
                     'Train Accuracy': [],
                     'Train F1': [],
                     'Train Precision': [],
@@ -194,15 +199,15 @@ def run_cv(data_path, results, skf, min_feats = 70, tol = 0.01, generate_LR = Fa
                 y_val_pred = model.predict(X_val)
 
             # --------------------- Save Results ------------------- #
-            results[model_name + 'FEAT SEL']['Train Accuracy'].append(accuracy_score(y_train, y_train_pred))
-            results[model_name + 'FEAT SEL']['Train F1'].append(f1_score(y_train, y_train_pred, average = 'weighted'))
-            results[model_name + 'FEAT SEL']['Train Precision'].append(precision_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
-            results[model_name + 'FEAT SEL']['Train Recall'].append(recall_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
+            results[model_name + ' FEAT SEL']['Train Accuracy'].append(accuracy_score(y_train, y_train_pred))
+            results[model_name + ' FEAT SEL']['Train F1'].append(f1_score(y_train, y_train_pred, average = 'weighted'))
+            results[model_name + ' FEAT SEL']['Train Precision'].append(precision_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
+            results[model_name + ' FEAT SEL']['Train Recall'].append(recall_score(y_train, y_train_pred, average = 'weighted', zero_division = 1))
 
-            results[model_name + 'FEAT SEL']['Val Accuracy'].append(accuracy_score(y_val, y_val_pred))
-            results[model_name + 'FEAT SEL']['Val F1'].append(f1_score(y_val, y_val_pred, average = 'weighted'))
-            results[model_name + 'FEAT SEL']['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
-            results[model_name + 'FEAT SEL']['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
+            results[model_name + ' FEAT SEL']['Val Accuracy'].append(accuracy_score(y_val, y_val_pred))
+            results[model_name + ' FEAT SEL']['Val F1'].append(f1_score(y_val, y_val_pred, average = 'weighted'))
+            results[model_name + ' FEAT SEL']['Val Precision'].append(precision_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
+            results[model_name + ' FEAT SEL']['Val Recall'].append(recall_score(y_val, y_val_pred, average = 'weighted', zero_division = 1))
 
     # -------------------- Save Feature Selection Results ----------------------- #
     feat_sel_res = pd.DataFrame.from_dict(feat_sel, orient = 'index')
@@ -210,31 +215,31 @@ def run_cv(data_path, results, skf, min_feats = 70, tol = 0.01, generate_LR = Fa
 
     # ------------- Calculate Mean, Median and Stdev for each metric ------------ #
     for model_name in models.keys():
-        results[model_name + 'FEAT SEL']['Train Accuracy Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train Accuracy'])
-        results[model_name + 'FEAT SEL']['Train Accuracy Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train Accuracy']))
-        results[model_name + 'FEAT SEL']['Train Accuracy Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train Accuracy'])
-        results[model_name + 'FEAT SEL']['Train F1 Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train F1'])
-        results[model_name + 'FEAT SEL']['Train F1 Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train F1']))
-        results[model_name + 'FEAT SEL']['Train F1 Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train F1'])
-        results[model_name + 'FEAT SEL']['Train Precision Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train Precision'])
-        results[model_name + 'FEAT SEL']['Train Precision Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train Precision']))
-        results[model_name + 'FEAT SEL']['Train Precision Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train Precision'])
-        results[model_name + 'FEAT SEL']['Train Recall Stdev'] = np.std(results[model_name + 'FEAT SEL']['Train Recall'])
-        results[model_name + 'FEAT SEL']['Train Recall Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Train Recall']))
-        results[model_name + 'FEAT SEL']['Train Recall Mean'] = np.mean(results[model_name + 'FEAT SEL']['Train Recall'])
+        results[model_name + ' FEAT SEL']['Train Accuracy Stdev'] = np.std(results[model_name + ' FEAT SEL']['Train Accuracy'])
+        results[model_name + ' FEAT SEL']['Train Accuracy Median'] = np.median(sorted(results[model_name + ' FEAT SEL']['Train Accuracy']))
+        results[model_name + ' FEAT SEL']['Train Accuracy Mean'] = np.mean(results[model_name + ' FEAT SEL']['Train Accuracy'])
+        results[model_name + ' FEAT SEL']['Train F1 Stdev'] = np.std(results[model_name + ' FEAT SEL']['Train F1'])
+        results[model_name + ' FEAT SEL']['Train F1 Median'] = np.median(sorted(results[model_name + ' FEAT SEL']['Train F1']))
+        results[model_name + ' FEAT SEL']['Train F1 Mean'] = np.mean(results[model_name + ' FEAT SEL']['Train F1'])
+        results[model_name + ' FEAT SEL']['Train Precision Stdev'] = np.std(results[model_name + ' FEAT SEL']['Train Precision'])
+        results[model_name + ' FEAT SEL']['Train Precision Median'] = np.median(sorted(results[model_name + ' FEAT SEL']['Train Precision']))
+        results[model_name + ' FEAT SEL']['Train Precision Mean'] = np.mean(results[model_name + ' FEAT SEL']['Train Precision'])
+        results[model_name + ' FEAT SEL']['Train Recall Stdev'] = np.std(results[model_name + ' FEAT SEL']['Train Recall'])
+        results[model_name + ' FEAT SEL']['Train Recall Median'] = np.median(sorted(results[model_name + ' FEAT SEL']['Train Recall']))
+        results[model_name + ' FEAT SEL']['Train Recall Mean'] = np.mean(results[model_name + ' FEAT SEL']['Train Recall'])
 
-        results[model_name + 'FEAT SEL']['Val Accuracy Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val Accuracy'])
-        results[model_name + 'FEAT SEL']['Val Accuracy Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val Accuracy']))
-        results[model_name + 'FEAT SEL']['Val Accuracy Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val Accuracy'])
-        results[model_name + 'FEAT SEL']['Val F1 Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val F1'])
-        results[model_name + 'FEAT SEL']['Val F1 Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val F1']))
-        results[model_name + 'FEAT SEL']['Val F1 Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val F1'])
-        results[model_name + 'FEAT SEL']['Val Precision Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val Precision'])
-        results[model_name + 'FEAT SEL']['Val Precision Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val Precision']))
-        results[model_name + 'FEAT SEL']['Val Precision Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val Precision'])
-        results[model_name + 'FEAT SEL']['Val Recall Stdev'] = np.std(results[model_name + 'FEAT SEL']['Val Recall'])
-        results[model_name + 'FEAT SEL']['Val Recall Median'] = np.median(sorted(results[model_name + 'FEAT SEL']['Val Recall']))
-        results[model_name + 'FEAT SEL']['Val Recall Mean'] = np.mean(results[model_name + 'FEAT SEL']['Val Recall'])
+        results[model_name + ' FEAT SEL']['Val Accuracy Stdev'] = np.std(results[model_name + ' FEAT SEL']['Val Accuracy'])
+        results[model_name + ' FEAT SEL']['Val Accuracy Median'] = np.median(sorted(results[model_name + ' FEAT SEL']['Val Accuracy']))
+        results[model_name + ' FEAT SEL']['Val Accuracy Mean'] = np.mean(results[model_name + ' FEAT SEL']['Val Accuracy'])
+        results[model_name + ' FEAT SEL']['Val F1 Stdev'] = np.std(results[model_name + ' FEAT SEL']['Val F1'])
+        results[model_name + ' FEAT SEL']['Val F1 Median'] = np.median(sorted(results[model_name + ' FEAT SEL']['Val F1']))
+        results[model_name + ' FEAT SEL']['Val F1 Mean'] = np.mean(results[model_name + ' FEAT SEL']['Val F1'])
+        results[model_name + ' FEAT SEL']['Val Precision Stdev'] = np.std(results[model_name + ' FEAT SEL']['Val Precision'])
+        results[model_name + ' FEAT SEL']['Val Precision Median'] = np.median(sorted(results[model_name + ' FEAT SEL']['Val Precision']))
+        results[model_name + ' FEAT SEL']['Val Precision Mean'] = np.mean(results[model_name + ' FEAT SEL']['Val Precision'])
+        results[model_name + ' FEAT SEL']['Val Recall Stdev'] = np.std(results[model_name + ' FEAT SEL']['Val Recall'])
+        results[model_name + ' FEAT SEL']['Val Recall Median'] = np.median(sorted(results[model_name + ' FEAT SEL']['Val Recall']))
+        results[model_name + ' FEAT SEL']['Val Recall Mean'] = np.mean(results[model_name + ' FEAT SEL']['Val Recall'])
 
     return results
 
@@ -256,9 +261,10 @@ start_time = time.time()
 
 # Exec 1
 res = {}
-file = open('results/feat_sel/selected_features.txt', 'w')
+file = open('results/feat_sel/models_configs.txt', 'w')
 file.close()
-res = run_cv('data/data_feat_selection.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab, configs_svm = configs_svm, configs_knn = configs_knn, configs_mlp = configs_mlp)
+# res = run_cv('data/data_feat_selection.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab, configs_svm = configs_svm, configs_knn = configs_knn, configs_mlp = configs_mlp)
+res = run_cv('data/data_feat_selection.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt)
 res = pd.DataFrame.from_dict(res, orient = 'index')
 res.to_csv('results/feat_sel/scores.csv')
 
