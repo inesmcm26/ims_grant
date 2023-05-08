@@ -179,3 +179,18 @@ DÚVIDAS:
    Realcei as vantagens do TPOT em relação à GridSearch. A ideia no final era mostrar que o TPOT é melhor.
 4. No final vou ter de escrever um relatório detalhado? É só para entregar à FCT? É para ser um artigo para ser
    publicado como os dois artigos que o prof me mostrou?
+
+-------------------------- 08/05/2023 ------------------------------
+
+Analise dos resultados:
+- Comparação da melhor configuração de cada modelo
+- Significância estatística entre quais modelos?
+- Analisar melhor modelo
+- Vantagens de TPOT vs Grid Search como approach de AutoML
+- Analisar quando a overfitting (TPOT é melhor nisto)
+- Feature selection: quantas features escolhidas em média + interpretação das features
+  escolhidas em mais de metade dos folds
+
+Relatório
+1. ?
+2. ?
