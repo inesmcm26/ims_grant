@@ -250,9 +250,9 @@ generate_LR = True
 configs_dt = generate_configs_DT(n_models = 30)
 configs_rf = generate_configs_RF(n_models = 30)
 configs_gb = generate_configs_GB(n_models = 30)
-configs_ab = generate_configs_AB(n_models = 15) # 15
-configs_svm = generate_configs_SVC(n_models = 30) # 30
-configs_knn = generate_configs_KNN(n_models = 16) # 16
+configs_ab = generate_configs_AB(n_models = 15)
+configs_svm = generate_configs_SVC(n_models = 30)
+configs_knn = generate_configs_KNN(n_models = 16)
 configs_mlp = generate_configs_MLP(n_models = 30)
 
 skf = StratifiedKFold(n_splits = 10, shuffle = True, random_state = seed)
@@ -263,8 +263,7 @@ start_time = time.time()
 res = {}
 file = open('results/feat_sel/models_configs.txt', 'w')
 file.close()
-# res = run_cv('data/data_feat_selection.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab, configs_svm = configs_svm, configs_knn = configs_knn, configs_mlp = configs_mlp)
-res = run_cv('data/data_feat_selection.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt)
+res = run_cv('data/data_feat_selection.csv', res, skf, generate_LR = generate_LR, configs_dt = configs_dt, configs_rf = configs_rf, configs_gb = configs_gb, configs_ab = configs_ab, configs_svm = configs_svm, configs_knn = configs_knn, configs_mlp = configs_mlp)
 res = pd.DataFrame.from_dict(res, orient = 'index')
 res.to_csv('results/feat_sel/scores.csv')
 
