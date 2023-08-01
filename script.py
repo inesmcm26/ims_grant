@@ -13,7 +13,6 @@
 # f1 score averaged
 # precision averaged
 # recall averaged
-# ROC AUC averaged
 
 # preprocessing:
 # - fill the missing values DONE
