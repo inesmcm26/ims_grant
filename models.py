@@ -27,6 +27,7 @@ def get_random(n_models, *args):
     return random_configs
 
 
+# ------------------------ Generate configurations --------------- #
 def generate_configs_DT(n_models):
 
     criterion = ['gini', 'entropy']
@@ -102,6 +103,8 @@ def generate_configs_MLP(n_models):
     learning_rate_init = [0.0001, 0.001]   
 
     return get_random(n_models, hidden_layer_sizes, alpha, batch_size, learning_rate_init)
+
+# ------------------------ Generate model instances from configurations --------------- #
 
 def generate_DT(configs, class_weights, seed):
     models = {}
@@ -222,6 +225,7 @@ def create_LR(seed, class_weights):
 
     return models
 
+# -------------- Generate all requested model instances  -------------- #
 
 def get_models(generate_LR = False, configs_dt = None, configs_rf = None, configs_gb = None, configs_ab = None, configs_svm = None, configs_knn = None,
                configs_mlp = None, class_weights = None, seed = None):

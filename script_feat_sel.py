@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 # Utils
-from utils import scale
+from scalers import scale
 from models import get_models, generate_configs_DT, generate_configs_RF, generate_configs_GB, generate_configs_AB, generate_configs_SVC, generate_configs_KNN, generate_configs_MLP
 
 # Metrics
@@ -111,6 +111,10 @@ def run_cv(data_path, results, skf, min_feats = 70, tol = 0.01, generate_LR = Fa
 
 
         # -------------------- One hot encoding ------------------- #
+        # This needs to be done here because it needs to be done after
+        # feature selection. Otherwise, feature selection could select
+        # only some one-hot encodings from one feature. This wouldn't make sense.
+        
         cat_feats = ['sample', 'FINGOALS', 'AUTOMATED_1', 'AUTOMATED_2',
              'HOUSING', 'LIVINGARRANGEMENT', 'SNAP', 'FRAUD2',
              'COVERCOSTS', 'MANAGE2', 'RETIRE', 'generation',
